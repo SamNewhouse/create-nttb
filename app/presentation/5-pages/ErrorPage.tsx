@@ -1,5 +1,6 @@
 import { NextPage } from 'next';
 import BaseLayout from 'presentation/4-layouts/BaseLayout';
+import * as Sentry from '@sentry/react';
 import React from 'react';
 
 interface Props {
@@ -21,6 +22,14 @@ const ErrorPage: NextPage<Props> = ({ statusCode }) => {
 };
 
 ErrorPage.getInitialProps = async ({ res, err }): Promise<Props> => {
+
+  if (res) {
+    Sentry.setContext('Response', res);
+  }
+
+  if (err) {
+    Sentry.captureException(err);
+  }
 
   const statusCode = !(res && res.statusCode)
     ? (err && err.statusCode) ? err.statusCode : null

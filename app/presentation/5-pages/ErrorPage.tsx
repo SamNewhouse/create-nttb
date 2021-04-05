@@ -11,7 +11,7 @@ const ErrorPage: NextPage<Props> = ({ statusCode }) => {
 
   return (
     <>
-      <BaseLayout>
+      <BaseLayout className="error">
         <div className="">
           <h1>{statusCode ? statusCode : 'Unknown'}</h1>
           <h2>{statusCode === 404 ? 'Page not found' : 'An error occurred'}</h2>

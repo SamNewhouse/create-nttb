@@ -7,7 +7,7 @@ interface Props {
 const BaseLayout: FC<Props> = ({ children, className }) => {
   return (
     <>
-      <div className={`max-w-screen-lg mx-auto ${className ? ' ' + className : ''}`}>
+      <div className={`max-w-screen-lg mx-auto antialiased${className ? ' ' + className : ''}`}>
         {children}
       </div>
     </>

@@ -1,6 +1,5 @@
 import { NextPage } from 'next';
 import BaseLayout from 'presentation/4-layouts/BaseLayout';
-import * as Sentry from '@sentry/react';
 import React from 'react';
 
 interface Props {
@@ -12,9 +11,9 @@ const ErrorPage: NextPage<Props> = ({ statusCode }) => {
   return (
     <>
       <BaseLayout className="error">
-        <div className="">
-          <h1>{statusCode ? statusCode : 'Unknown'}</h1>
-          <h2>{statusCode === 404 ? 'Page not found' : 'An error occurred'}</h2>
+        <div className="flex flex-col justify-center items-center">
+          <h1 className="font-serif text-9xl leading-tight">{statusCode ? statusCode : 'Unknown'}</h1>
+          <h2 className="font-sans text-2xl ">{statusCode === 404 ? 'Page not found' : 'An error occurred'}</h2>
         </div>
       </BaseLayout>
     </>
@@ -22,14 +21,6 @@ const ErrorPage: NextPage<Props> = ({ statusCode }) => {
 };
 
 ErrorPage.getInitialProps = async ({ res, err }): Promise<Props> => {
-
-  if (res) {
-    Sentry.setContext('Response', res);
-  }
-
-  if (err) {
-    Sentry.captureException(err);
-  }
 
   const statusCode = !(res && res.statusCode)
     ? (err && err.statusCode) ? err.statusCode : null

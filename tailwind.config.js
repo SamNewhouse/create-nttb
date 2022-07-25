@@ -2,7 +2,6 @@ const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
   purge: ['./pages/**/*.{ts,tsx,js,jsx}', './app/**/*.{ts,tsx,js,jsx}'],
-  darkMode: false, // or 'media' or 'class'
   theme: {
     fontFamily:{
       serif: ['"Playfair Display"', ...defaultTheme.fontFamily.serif],

@@ -1,7 +1,8 @@
-import React, { FC, memo, PropsWithChildren } from 'react';
+import React, { FC, memo, PropsWithChildren, ReactNode } from 'react';
 
 interface Props {
-  className?: string
+  children?: ReactNode;
+  className?: string;
 }
 
 const BaseLayout: FC<Props> = ({ children, className }) => {

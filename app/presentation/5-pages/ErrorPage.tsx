@@ -1,6 +1,5 @@
 import { NextPage } from 'next';
 import BaseLayout from 'presentation/4-layouts/BaseLayout';
-import React from 'react';
 
 interface Props {
   statusCode: number | null

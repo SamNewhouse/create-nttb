@@ -1,4 +1,4 @@
-import React, { FC, memo, PropsWithChildren, ReactNode } from 'react';
+import { FC, memo, PropsWithChildren, ReactNode } from 'react';
 
 interface Props {
   children?: ReactNode;
@@ -8,7 +8,7 @@ interface Props {
 const BaseLayout: FC<Props> = ({ children, className }) => {
   return (
     <>
-      <div className={`max-w-screen-lg mx-auto antialiased${className ? ' ' + className : ''}`}>
+      <div className={`bg-slate-200 mx-auto antialiased${className ? ' ' + className : ''}`}>
         {children}
       </div>
     </>

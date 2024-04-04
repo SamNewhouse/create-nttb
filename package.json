@@ -1,7 +1,13 @@
 {
   "name": "nextjs-typescript-tailwind-boilerplate",
-  "version": "2.0.0",
-  "private": true,
+  "version": "2.0.1",
+  "description": "An opinionated NextJs, Typescript and Tailwind boilerplate using the Atomic Design Methodology for presentation components",
+  "keywords": [
+    "typescript",
+    "tailwindcss",
+    "nextjs",
+    "atomic-design"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -20,5 +26,6 @@
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.3.0"
-  }
+  },
+  "author": "Sam Newhouse (https://github.com/SamNewhouse)"
 }

@@ -6,7 +6,6 @@ jobs:
   check:
     name: Check version
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'master')
 
     steps:
       - name: Checkout repository

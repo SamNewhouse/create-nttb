@@ -3,7 +3,7 @@ on: [pull_request]
 name: Check version
 
 jobs:
-  publish:
+  check:
     name: Check version
     runs-on: ubuntu-latest
     if: contains(github.ref, 'master')

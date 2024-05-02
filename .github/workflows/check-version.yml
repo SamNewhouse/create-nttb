@@ -1,6 +1,6 @@
 on: [pull_request]
 
-name: Publish to NPM
+name: Check version
 
 jobs:
   publish:
@@ -24,4 +24,6 @@ jobs:
 
       - name: Version update NOT detected
         if: steps.check.outputs.changed == 'false'
-        run: 'echo "Version change NOT found! Version: ${{ steps.check.outputs.version }}"'
+        run: |
+          echo "Version change NOT found! Version: ${{ steps.check.outputs.version }}"
+          exit 1

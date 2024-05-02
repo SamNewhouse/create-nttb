@@ -7,7 +7,7 @@ name: Publish to NPM
 
 jobs:
   publish:
-    name: Publish to NPM & GitHub Package Registry
+    name: Publish to NPM
     runs-on: ubuntu-latest
     if: contains(github.ref, 'master')
 

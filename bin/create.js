@@ -44,6 +44,11 @@ async function main() {
       execSync("npx rimraf ./.git");
     }
 
+    if (fs.existsSync("./.github")) {
+      console.log("Cleaning out unnecessary .github directory...");
+      execSync("npx rimraf ./.github");
+    }
+
     if (fs.existsSync("./bin")) {
       console.log("Removing unnecessary bin directory...");
       execSync("npx rimraf ./bin");

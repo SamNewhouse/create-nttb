@@ -1,0 +1,27 @@
+on: [pull_request]
+
+name: Publish to NPM
+
+jobs:
+  publish:
+    name: Check version
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'master')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Check version changes
+        uses: EndBug/version-check@v2
+        id: check
+
+      - name: Version update detected
+        if: steps.check.outputs.changed == 'true'
+        run: 'echo "Version change found! New version: ${{ steps.check.outputs.version }} (${{ steps.check.outputs.type }})"'
+
+      - name: Version update NOT detected
+        if: steps.check.outputs.changed == 'false'
+        run: 'echo "Version change NOT found! Version: ${{ steps.check.outputs.version }}"'

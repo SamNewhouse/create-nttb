@@ -7,7 +7,7 @@ jobs:
     name: Check version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Check if version changed
-        uses: rpiambulance/action-pr-version-check@v0.1.1
+      - uses: avides/actions-project-version-check@v1.4.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          file-to-check: package.json

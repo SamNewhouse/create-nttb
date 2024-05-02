@@ -7,7 +7,11 @@ jobs:
     name: Check version
     runs-on: ubuntu-latest
     steps:
-      - uses: avides/actions-project-version-check@v1.4.0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Project version check
+        uses: avides/actions-project-version-check@v1.4.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           file-to-check: package.json

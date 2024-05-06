@@ -1,6 +1,8 @@
 # Next.js TypeScript Tailwind Boilerplate by Sam Newhouse
 
-Use `npx create-nttb app-name` to get started. This will download all boilerplate files ready for you to use.
+Use `npm create nttb app-name` or `npx create-nttb app-name` to get started.
+
+This will download all boilerplate files ready for you to use.
 
 ## Getting Started
 

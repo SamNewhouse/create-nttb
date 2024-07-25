@@ -35,9 +35,6 @@ async function main() {
 
     process.chdir(projectPath);
 
-    console.log("Installing dependencies...");
-    execSync("npm install");
-
     console.log("Removing unnecessary files");
     if (fs.existsSync("./.git")) {
       console.log("Cleaning out unnecessary .git directory...");
@@ -49,12 +46,20 @@ async function main() {
       execSync("npx rimraf ./.github");
     }
 
+    if (fs.existsSync("package.json")) {
+      console.log("Updating package.json file");
+      execSync("cp -f ./bin/package.json .")
+    }
+
     if (fs.existsSync("./bin")) {
-      console.log("Removing unnecessary bin directory...");
+      console.log("Removing bin directory...");
       execSync("npx rimraf ./bin");
     }
 
-    console.log("Installed successfully. Enjoy!");
+    console.log("Installing dependencies...");
+    execSync("npm install");
+
+    console.log("Installed create-nttb successfully. Enjoy!");
   } catch (error) {
     console.log(error);
     process.exit(1);

@@ -53,6 +53,3 @@ jobs:
           git commit -m "Bump version to ${{ env.new_version }}"
           git pull --rebase origin ${{ github.event.pull_request.head.ref || github.ref_name }}
           git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
-
-      - name: Successfully updated version
-          if: ste

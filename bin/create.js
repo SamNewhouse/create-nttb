@@ -56,6 +56,11 @@ async function main() {
       execSync("npx rimraf ./bin");
     }
 
+    if (fs.existsSync("renovate.json")) {
+      console.log("Removeing renovate.json...");
+      execSync("rm -f renovate.json")
+    }
+
     console.log("Installing dependencies...");
     execSync("npm install");
 

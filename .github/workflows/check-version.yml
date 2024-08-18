@@ -3,52 +3,80 @@ on: [pull_request]
 name: Check version
 
 jobs:
-  check:
-    name: Check version
-    runs-on: ubuntu-latest
+  check_version:
+    runs-on: ubuntu-latest  # Use the latest version of Ubuntu as the runner environment
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout the repository
+        uses: actions/checkout@v3  # Checkout the current branch code
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v3  # Set up the Node.js environment
         with:
-          node-version: '16'
+          node-version: '16'  # Specify the Node.js version to use
 
       - name: Get package.json version from master branch
-        id: master_version
+        id: master_version  # ID to reference this step's output in later steps
         run: |
+          # Fetch the latest master branch and store it in a remote reference
           git fetch origin master:refs/remotes/origin/master
+          
+          # Extract the version from package.json in the master branch using jq
           master_version=$(jq -r .version <(git show origin/master:package.json))
+          
+          # Store the master branch version in an environment variable for later use
           echo "master_version=$master_version" >> $GITHUB_ENV
 
       - name: Get package.json version from current branch
-        id: current_version
+        id: current_version  # ID to reference this step's output in later steps
         run: |
+          # Extract the version from package.json in the current branch using jq
           branch_version=$(jq -r .version package.json)
+          
+          # Store the current branch version in an environment variable for later use
           echo "branch_version=$branch_version" >> $GITHUB_ENV
 
       - name: Compare versions and update if necessary
-        id: compare_versions
+        id: compare_versions  # ID to reference this step's output in later steps
         run: |
+          # Compare the current branch version with the master branch version
           if [ "$branch_version" = "$master_version" ]; then
+            # Split the version into major, minor, and patch components
             IFS='.' read -r major minor patch <<< "$branch_version"
+            
+            # Increment the patch number by 1
             patch=$((patch + 1))
+            
+            # Construct the new version string
             new_version="$major.$minor.$patch"
             echo "New version: $new_version"
+            
+            # Update the package.json with the new version
             jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
+            
+            # Output a message indicating the version was updated
             echo "Version updated to $new_version"
+            
+            # Indicate that the version was updated
             echo "version_updated=true" >> $GITHUB_ENV
           else
+            # If the versions are different, no update is needed
             echo "Versions are different. No update needed."
             echo "version_updated=false" >> $GITHUB_ENV
-          fi
 
       - name: Commit version bump
+        # This step will only run if the version was updated (version_updated is true)
         if: env.version_updated == 'true'
         run: |
+          # Set up Git with GitHub Actions bot user credentials
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Stage the updated package.json file
           git add package.json
+          
+          # Commit the change with a message including the new version
           git commit -m "Bump version to ${{ env.new_version }}"
+          
+          # Push the commit back to the current branch
           git push origin HEAD:${{ github.ref }}

@@ -39,6 +39,7 @@ jobs:
             jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
             echo "Version updated to $new_version"
             echo "version_updated=true" >> $GITHUB_ENV
+            echo "new_version=$new_version" >> $GITHUB_ENV
           else
             echo "Versions are different. No update needed."
             echo "version_updated=false" >> $GITHUB_ENV

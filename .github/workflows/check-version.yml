@@ -49,12 +49,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Stage the updated package.json file
+          git pull --rebase origin ${{ github.event.pull_request.head.ref || github.ref_name }}
           git add package.json
-
-          # Commit the change with a message including the new version
           git commit -m "Bump version to ${{ env.new_version }}"
-
-          # Push the commit to the original branch that triggered the workflow
           git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}

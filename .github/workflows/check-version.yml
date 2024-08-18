@@ -1,17 +1,51 @@
+name: Check Package Version
+
 on: [pull_request]
 
-name: Check version
-
 jobs:
-  check:
-    name: Check version
+  check_version:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
-      - name: Project version check
-        uses: avides/actions-project-version-check@v1.4.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          file-to-check: package.json
+          node-version: '16'
+
+      - name: Get package.json version from master branch
+        id: master_version
+        run: |
+          git fetch origin master:refs/remotes/origin/master
+          master_version=$(jq -r .version <(git show origin/master:package.json))
+          echo "master_version=$master_version" >> $GITHUB_ENV
+
+      - name: Get package.json version from current branch
+        id: current_version
+        run: |
+          branch_version=$(jq -r .version package.json)
+          echo "branch_version=$branch_version" >> $GITHUB_ENV
+
+      - name: Compare versions and update if necessary
+        id: compare_versions
+        run: |
+          if [ "$branch_version" = "$master_version" ]; then
+            IFS='.' read -r major minor patch <<< "$branch_version"
+            minor=$((minor + 1))
+            new_version="$major.$minor.$patch"
+            echo "New version: $new_version"
+            jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
+            echo "Version updated to $new_version"
+          else
+            echo "Versions are different. No update needed."
+          fi
+
+      - name: Commit version bump
+        if: steps.compare_versions.outputs.version_updated == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "Bump version to ${{ env.new_version }}"
+          git push origin HEAD:${{ github.ref }}

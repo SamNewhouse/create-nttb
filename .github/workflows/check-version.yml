@@ -1,13 +1,14 @@
-name: Check Package Version
-
 on: [pull_request]
 
+name: Check version
+
 jobs:
-  check_version:
+  check:
+    name: Check version
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -32,17 +33,19 @@ jobs:
         run: |
           if [ "$branch_version" = "$master_version" ]; then
             IFS='.' read -r major minor patch <<< "$branch_version"
-            minor=$((minor + 1))
+            patch=$((patch + 1))
             new_version="$major.$minor.$patch"
             echo "New version: $new_version"
             jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
             echo "Version updated to $new_version"
+            echo "version_updated=true" >> $GITHUB_ENV
           else
             echo "Versions are different. No update needed."
+            echo "version_updated=false" >> $GITHUB_ENV
           fi
 
       - name: Commit version bump
-        if: steps.compare_versions.outputs.version_updated == 'true'
+        if: env.version_updated == 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

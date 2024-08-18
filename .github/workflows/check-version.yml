@@ -42,6 +42,7 @@ jobs:
           else
             echo "Versions are different. No update needed."
             echo "version_updated=false" >> $GITHUB_ENV
+          fi
 
       - name: Commit version bump
         if: env.version_updated == 'true'

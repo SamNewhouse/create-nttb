@@ -3,12 +3,12 @@ on: [pull_request]
 name: Check version
 
 jobs:
-  check:
-    name: Check version
+  check_version:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -42,13 +42,18 @@ jobs:
           else
             echo "Versions are different. No update needed."
             echo "version_updated=false" >> $GITHUB_ENV
-          fi
 
       - name: Commit version bump
         if: env.version_updated == 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage the updated package.json file
           git add package.json
+
+          # Commit the change with a message including the new version
           git commit -m "Bump version to ${{ env.new_version }}"
-          git push origin HEAD:${{ github.ref }}
+
+          # Push the commit to the original branch that triggered the workflow
+          git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}

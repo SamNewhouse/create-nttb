@@ -6,9 +6,9 @@
   "packageRules": [
     {
       "matchFileNames": ["**/package.json"],
-      "packagePatterns": ["*"],
       "commitMessageSuffix": "[DEPENDENCY]",
-      "enabled": false
+      "matchPackageNames": ["*"],
+      "automerge": false
     }
   ]
 }

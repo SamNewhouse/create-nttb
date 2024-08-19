@@ -17,47 +17,22 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Get package.json version from master branch
-        id: master_version
-        run: |
-          git fetch origin master
-          master_version=$(jq -r .version <(git show origin/master:package.json))
-          echo "master_version=$master_version" >> $GITHUB_ENV
+      - name: Bump version if necessary
+        uses: phips28/gh-action-bump-version@v1
+        with:
+          file: package.json
+          version-file: package.json
+          version: 'patch'  # Bump patch version (or 'minor'/'major' as needed)
+          commit-message: 'Bump version to {version}'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get package.json version from current branch
-        id: current_version
+      - name: Push changes
+        if: github.event_name == 'pull_request' && github.event.action == 'synchronize'
         run: |
-          branch_version=$(jq -r .version package.json)
-          echo "branch_version=$branch_version" >> $GITHUB_ENV
-
-      - name: Compare versions and update if necessary
-        id: compare_versions
-        run: |
-          if [ "$branch_version" = "$master_version" ]; then
-            IFS='.' read -r major minor patch <<< "$branch_version"
-            patch=$((patch + 1))
-            new_version="$major.$minor.$patch"
-            echo "New version: $new_version"
-            jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
-            echo "Version updated to $new_version"
-            echo "version_updated=true" >> $GITHUB_ENV
-            echo "new_version=$new_version" >> $GITHUB_ENV
-          else
-            echo "Versions are different. No update needed."
-            echo "version_updated=false" >> $GITHUB_ENV
-          fi
-
-      - name: Commit version bump
-        if: env.version_updated == 'true'
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
-          git commit -m "Changed version to ${{ env.new_version }}"
-          git pull --rebase origin ${{ github.head_ref }}
           git push origin HEAD:${{ github.head_ref }}
 
       - name: Success
+        if: success()
         run: echo "Version check and update workflow completed successfully."
 
       - name: Failure

@@ -18,7 +18,7 @@ jobs:
       - name: Get package.json version from master branch
         id: master_version
         run: |
-          git fetch origin master:refs/remotes/origin/master
+          git fetch origin master
           master_version=$(jq -r .version <(git show origin/master:package.json))
           echo "master_version=$master_version" >> $GITHUB_ENV
 
@@ -54,3 +54,10 @@ jobs:
           git commit -m "Changed version to ${{ env.new_version }}"
           git pull --rebase origin ${{ github.event.pull_request.head.ref || github.ref_name }}
           git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
+
+      - name: Success
+        run: echo "Version check and update workflow completed successfully."
+
+      - name: Failure
+        if: failure()
+        run: echo "Version check and update workflow failed."

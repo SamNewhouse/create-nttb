@@ -1,6 +1,8 @@
 name: Check version
 
-on: [pull_request]
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
 
 jobs:
   check_version:
@@ -52,8 +54,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "Changed version to ${{ env.new_version }}"
-          git pull --rebase origin ${{ github.event.pull_request.head.ref || github.ref_name }}
-          git push origin HEAD:${{ github.event.pull_request.head.ref || github.ref_name }}
+          git pull --rebase origin ${{ github.head_ref }}
+          git push origin HEAD:${{ github.head_ref }}
 
       - name: Success
         run: echo "Version check and update workflow completed successfully."

@@ -18,7 +18,7 @@ jobs:
           node-version: '16'
 
       - name: Bump version if necessary
-        uses: phips28/gh-action-bump-version@v1
+        uses: phips28/gh-action-bump-version@master
         with:
           file: package.json
           version-file: package.json

@@ -1,6 +1,6 @@
-on: [pull_request]
-
 name: Check version
+
+on: [pull_request]
 
 jobs:
   check_version:

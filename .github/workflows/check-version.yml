@@ -20,7 +20,11 @@ jobs:
       - name: "Automated Version Bump"
         uses: "phips28/gh-action-bump-version@master"
         with:
-          tag-prefix: ''
+          tag-prefix: 'v'
+          major-wording:  '(major)'
+          minor-wording:  '(minor)'
+          patch-wording:  '(patch)'
+          commit-message: 'Updated version to v{{version}} [skip ci]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "cat package.json"

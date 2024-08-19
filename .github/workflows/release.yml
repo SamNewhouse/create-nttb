@@ -1,9 +1,9 @@
-name: Create Draft Release
-
 on:
   push:
     branches:
       - master
+
+name: Create Release
 
 jobs:
   create-release:

@@ -9,32 +9,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: "Checkout source code"
+        uses: "actions/checkout@v2"
         with:
-          node-version: '16'
-
-      - name: Bump version if necessary
-        uses: phips28/gh-action-bump-version@master
+          ref: ${{ github.ref }}
+      - name: "cat package.json"
+        run: cat ./package.json
+      - name: "Setup Node.js"
+        uses: "actions/setup-node@v1"
         with:
-          file: package.json
-          version-file: package.json
-          version: 'patch'  # Bump patch version (or 'minor'/'major' as needed)
-          commit-message: 'Bump version to {version}'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push changes
-        if: github.event_name == 'pull_request' && github.event.action == 'synchronize'
-        run: |
-          git push origin HEAD:${{ github.head_ref }}
-
-      - name: Success
-        if: success()
-        run: echo "Version check and update workflow completed successfully."
-
-      - name: Failure
-        if: failure()
-        run: echo "Version check and update workflow failed."
+          node-version: 12
+      - name: "Automated Version Bump"
+        uses: "phips28/gh-action-bump-version@master"
+        with:
+          tag-prefix: ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "cat package.json"
+        run: cat ./package.json

@@ -20,13 +20,13 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@types/node": "20.16.0",
-    "@types/react": "18.3.3",
+    "@types/node": "20.16.1",
+    "@types/react": "18.3.4",
     "@types/react-dom": "18.3.0",
     "autoprefixer": "10.4.20",
     "postcss": "8.4.41",
     "tailwindcss": "3.4.10",
-    "typescript": "5.4.4"
+    "typescript": "5.5.4"
   },
   "author": "Sam Newhouse (https://github.com/SamNewhouse)",
   "bin": {

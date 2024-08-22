@@ -5,7 +5,7 @@
   "addLabels": ["dependency"],
   "packageRules": [
     {
-      "matchFileNames": ["package.json", "bin/package.json"],
+      "matchFileNames": ["package.json"],
       "commitMessagePrefix": "[DEPENDENCY]",
       "matchPackageNames": ["*"],
       "automerge": false,

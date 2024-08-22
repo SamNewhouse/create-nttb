@@ -3,6 +3,9 @@ name: Check version
 on:
   pull_request:
     types: [synchronize, opened, reopened]
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'renovate.json'
 
 jobs:
   check_version:

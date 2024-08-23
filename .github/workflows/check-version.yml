@@ -3,6 +3,9 @@ name: Check version
 on:
   pull_request:
     types: [synchronize, opened, reopened]
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'renovate.json'
 
 jobs:
   check_version:
@@ -10,12 +13,12 @@ jobs:
 
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
 
       - name: Get package.json version from master branch
         id: master_version
@@ -50,12 +53,14 @@ jobs:
       - name: Commit version bump
         if: env.version_updated == 'true'
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "SamNewhouse"
+          git config --global user.email "hello@samnewhouse.co.uk"
           git add package.json
           git commit -m "Changed version to ${{ env.new_version }}"
           git pull --rebase origin ${{ github.head_ref }}
           git push origin HEAD:${{ github.head_ref }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Success
         run: echo "Version check and update workflow completed successfully."

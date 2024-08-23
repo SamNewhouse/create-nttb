@@ -8,13 +8,8 @@
       "matchFileNames": ["package.json"],
       "commitMessagePrefix": "[DEPENDENCY]",
       "matchPackageNames": ["*"],
-      "automerge": false
-    },
-    {
-      "matchFileNames": ["bin/package.json"],
-      "commitMessagePrefix": "[DEPENDENCY]",
-      "matchPackageNames": ["*"],
-      "automerge": false
+      "automerge": false,
+      "separateMultipleMajor": true
     }
   ]
 }

@@ -1,0 +1,41 @@
+name: Test create-nttb Command
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install create-nttb globally
+      run: npm install -g .
+
+    - name: List Installed Packages
+      run: npm list -g
+
+    - name: Test create-nttb command with npx
+      run: |
+        npx create-nttb test-app
+
+        if [ ! -d "test-app" ]; then
+          echo "Error: test-app directory was not created."
+          exit 1
+        fi
+
+        if [ ! -f "test-app/package.json" ]; then
+          echo "Error: package.json file was not found in test-app."
+          exit 1
+        fi
+
+        rm -rf test-app

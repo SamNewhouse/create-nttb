@@ -20,9 +20,7 @@ function createProjectDirectory() {
     fs.mkdirSync(projectPath);
   } catch (err) {
     if (err.code === "EEXIST") {
-      console.error(
-        `The directory "${projectName}" already exists. Please choose another name.`
-      );
+      console.error(`The directory "${projectName}" already exists. Please choose another name.`);
     } else {
       console.error(`Error creating directory: ${err.message}`);
     }
@@ -63,21 +61,19 @@ function cleanUp() {
     "renovate.json"
   ];
 
-  console.log("Installing rimraf...");
-  runCommand('npm', ['install', 'rimraf']);
-
-  const rimraf = require('rimraf');
-
+  console.log("Cleaning up project...");
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
-      rimraf.sync(itemPath);
+      try {
+        runCommand('npx', ['rimraf', itemPath]);
+      } catch (err) {
+        console.error(`Failed to remove ${itemPath} using rimraf: ${err.message}`);
+        process.exit(1);
+      }
     }
   });
-
-  console.log("Uninstalling rimraf...");
-  runCommand('npm', ['uninstall', 'rimraf']);
 }
 
 async function main() {
@@ -91,7 +87,6 @@ async function main() {
   console.log("Installing dependencies...");
   runCommand('npm', ['install']);
 
-  console.log("Cleaning up project...");
   cleanUp();
 
   if (fs.existsSync("package.json")) {

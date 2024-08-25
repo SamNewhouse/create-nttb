@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -30,11 +30,11 @@ function createProjectDirectory() {
   }
 }
 
-function runCommand(command, options = {}) {
+function runCommand(command, args = [], options = {}) {
   try {
-    execSync(command, { stdio: "inherit", ...options });
+    execFileSync(command, args, { stdio: "inherit", ...options });
   } catch (err) {
-    console.error(`Error running command "${command}": ${err.message}`);
+    console.error(`Error running command "${command} ${args.join(' ')}": ${err.message}`);
     process.exit(1);
   }
 }
@@ -68,7 +68,7 @@ function cleanUp() {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
-      runCommand(`npx rimraf ${itemPath}`);
+      runCommand('npx', ['rimraf', itemPath]);
     }
   });
 }
@@ -77,7 +77,7 @@ async function main() {
   createProjectDirectory();
 
   console.log("Cloning repository...");
-  runCommand(`git clone --depth 1 ${gitRepo} ${projectPath}`);
+  runCommand('git', ['clone', '--depth', '1', gitRepo, projectPath]);
 
   process.chdir(projectPath);
 
@@ -89,7 +89,7 @@ async function main() {
   }
 
   console.log("Installing dependencies...");
-  runCommand("npm install");
+  runCommand('npm', ['install']);
 
   console.log("Installed create-nttb successfully. Enjoy!");
 }

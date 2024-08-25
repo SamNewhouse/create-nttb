@@ -67,7 +67,7 @@ function cleanUp() {
   console.log("Installing rimraf...");
   runCommand('npm', ['install', 'rimraf']);
 
-  const rimraf = require('rimraf');
+  const rimraf = require('rimraf');  // Import rimraf after installation
 
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);
@@ -79,6 +79,19 @@ function cleanUp() {
 
   console.log("Uninstalling rimraf...");
   runCommand('npm', ['uninstall', 'rimraf']);
+
+  removeRimrafFromPackageJson();
+}
+
+function removeRimrafFromPackageJson() {
+  const packageJsonPath = path.join(projectPath, "package.json");
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+
+  if (packageJson.dependencies && packageJson.dependencies.rimraf) {
+    delete packageJson.dependencies.rimraf;
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    console.log("Removed rimraf from package.json");
+  }
 }
 
 async function main() {

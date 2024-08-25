@@ -16,24 +16,22 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'  # Specify the Node.js version
+        node-version: '20'
 
     - name: Test create-nttb command
       run: |
-        # Run the create-nttb command
+        npm install -g .
+
         npx create-nttb test-app
 
-        # Verify the output
         if [ ! -d "test-app" ]; then
           echo "Error: test-app directory was not created."
           exit 1
         fi
 
-        # Check for expected files or content
         if [ ! -f "test-app/package.json" ]; then
           echo "Error: package.json file was not found in test-app."
           exit 1
         fi
 
-        # Clean up
         rm -rf test-app

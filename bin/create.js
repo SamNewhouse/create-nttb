@@ -43,12 +43,11 @@ function updatePackageJson() {
   const packageJsonPath = path.join(projectPath, "package.json");
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
-  // Remove unwanted fields and update required fields
   const updatedPackageJson = {
     ...packageJson,
-    name: "app",
+    name: projectName,
     version: "1.0.0",
-    description: "create-nttb app description",
+    description: `${projectName} app description`,
   };
   delete updatedPackageJson.author;
   delete updatedPackageJson.bin;
@@ -64,13 +63,21 @@ function cleanUp() {
     "renovate.json"
   ];
 
+  console.log("Installing rimraf...");
+  runCommand('npm', ['install', 'rimraf']);
+
+  const rimraf = require('rimraf');
+
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
-      runCommand('npx', ['rimraf', itemPath]);
+      rimraf.sync(itemPath);
     }
   });
+
+  console.log("Uninstalling rimraf...");
+  runCommand('npm', ['uninstall', 'rimraf']);
 }
 
 async function main() {
@@ -81,15 +88,16 @@ async function main() {
 
   process.chdir(projectPath);
 
+  console.log("Installing dependencies...");
+  runCommand('npm', ['install']);
+
+  console.log("Cleaning up project...");
   cleanUp();
 
   if (fs.existsSync("package.json")) {
     console.log("Updating package.json...");
     updatePackageJson();
   }
-
-  console.log("Installing dependencies...");
-  runCommand('npm', ['install']);
 
   console.log("Installed create-nttb successfully. Enjoy!");
 }

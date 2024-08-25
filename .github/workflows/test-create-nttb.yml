@@ -3,7 +3,7 @@ name: Test create-nttb Command
 on:
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   test:
@@ -18,10 +18,8 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Test create-nttb command
+    - name: Test create-nttb command with npx
       run: |
-        npm install -g .
-
         npx create-nttb test-app
 
         if [ ! -d "test-app" ]; then

@@ -78,19 +78,6 @@ function cleanUp() {
 
   console.log("Uninstalling rimraf...");
   runCommand('npm', ['uninstall', 'rimraf']);
-
-  removeRimrafFromPackageJson();
-}
-
-function removeRimrafFromPackageJson() {
-  const packageJsonPath = path.join(projectPath, "package.json");
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-
-  if (packageJson.dependencies && packageJson.dependencies.rimraf) {
-    delete packageJson.dependencies.rimraf;
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-    console.log("Removed rimraf from package.json");
-  }
 }
 
 async function main() {
@@ -101,15 +88,16 @@ async function main() {
 
   process.chdir(projectPath);
 
+  console.log("Installing dependencies...");
+  runCommand('npm', ['install']);
+
+  console.log("Cleaning up project...");
   cleanUp();
 
   if (fs.existsSync("package.json")) {
     console.log("Updating package.json...");
     updatePackageJson();
   }
-
-  console.log("Installing dependencies...");
-  runCommand('npm', ['install']);
 
   console.log("Installed create-nttb successfully. Enjoy!");
 }

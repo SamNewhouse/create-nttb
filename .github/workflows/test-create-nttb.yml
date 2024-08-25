@@ -20,9 +20,6 @@ jobs:
 
     - name: Test create-nttb command
       run: |
-        # Install create-nttb globally
-        npm install -g .
-
         # Run the create-nttb command
         npx create-nttb test-app
 

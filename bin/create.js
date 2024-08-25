@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execFileSync } = require("child_process");
+const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -32,7 +32,7 @@ function createProjectDirectory() {
 
 function runCommand(command, args = [], options = {}) {
   try {
-    execFileSync(command, args, { stdio: "inherit", ...options });
+    execSync(`${command} ${args.join(' ')}`, { stdio: "inherit", ...options });
   } catch (err) {
     console.error(`Error running command "${command} ${args.join(' ')}": ${err.message}`);
     process.exit(1);

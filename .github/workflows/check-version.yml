@@ -50,12 +50,16 @@ jobs:
             echo "version_updated=false" >> $GITHUB_ENV
           fi
 
+      - name: Update version in package-lock
+        if: env.version_updated == 'true'
+        run: npm install
+
       - name: Commit version bump
         if: env.version_updated == 'true'
         run: |
           git config --global user.name "SamNewhouse"
           git config --global user.email "hello@samnewhouse.co.uk"
-          git add package.json
+          git add package.json package-lock.json
           git commit -m "Changed version to ${{ env.new_version }}"
           git pull --rebase origin ${{ github.head_ref }}
           git push origin HEAD:${{ github.head_ref }}

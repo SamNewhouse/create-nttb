@@ -64,13 +64,21 @@ function cleanUp() {
     "renovate.json"
   ];
 
+  console.log("Installing rimraf...");
+  runCommand('npm', ['install', 'rimraf']);
+
+  const rimraf = require('rimraf');
+
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
-      runCommand('npx', ['rimraf', itemPath]);
+      rimraf.sync(itemPath);
     }
   });
+
+  console.log("Uninstalling rimraf...");
+  runCommand('npm', ['uninstall', 'rimraf']);
 }
 
 async function main() {

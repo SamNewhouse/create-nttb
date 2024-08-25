@@ -61,22 +61,14 @@ function cleanUp() {
     "renovate.json"
   ];
 
-  console.log("Installing rimraf...");
-  runCommand('npm', ['install', 'rimraf']);
-
-  // Now require rimraf from local node_modules
-  const rimraf = require('rimraf');
-
+  console.log("Cleaning up project...");
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
-      rimraf.sync(itemPath);
+      runCommand('npx', ['rimraf', itemPath]);
     }
   });
-
-  console.log("Uninstalling rimraf...");
-  runCommand('npm', ['uninstall', 'rimraf']);
 }
 
 async function main() {
@@ -90,7 +82,6 @@ async function main() {
   console.log("Installing dependencies...");
   runCommand('npm', ['install']);
 
-  console.log("Cleaning up project...");
   cleanUp();
 
   if (fs.existsSync("package.json")) {

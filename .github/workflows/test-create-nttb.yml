@@ -18,6 +18,13 @@ jobs:
       with:
         node-version: '20'
 
+    - name: Install Dependencies
+      run: npm install
+
+    - name: List Installed Packages
+      run: |
+        ls -la node_modules/.bin
+
     - name: Test create-nttb command with npx
       run: |
         npx create-nttb test-app

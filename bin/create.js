@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execFileSync } = require("child_process");
+const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -20,9 +20,7 @@ function createProjectDirectory() {
     fs.mkdirSync(projectPath);
   } catch (err) {
     if (err.code === "EEXIST") {
-      console.error(
-        `The directory "${projectName}" already exists. Please choose another name.`
-      );
+      console.error(`The directory "${projectName}" already exists. Please choose another name.`);
     } else {
       console.error(`Error creating directory: ${err.message}`);
     }
@@ -32,7 +30,7 @@ function createProjectDirectory() {
 
 function runCommand(command, args = [], options = {}) {
   try {
-    execFileSync(command, args, { stdio: "inherit", ...options });
+    execSync(`${command} ${args.join(' ')}`, { stdio: "inherit", ...options });
   } catch (err) {
     console.error(`Error running command "${command} ${args.join(' ')}": ${err.message}`);
     process.exit(1);
@@ -66,6 +64,7 @@ function cleanUp() {
   console.log("Installing rimraf...");
   runCommand('npm', ['install', 'rimraf']);
 
+  // Now require rimraf from local node_modules
   const rimraf = require('rimraf');
 
   pathsToRemove.forEach((item) => {

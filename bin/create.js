@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -30,7 +30,7 @@ function createProjectDirectory() {
 
 function runCommand(command, args = [], options = {}) {
   try {
-    execSync(`${command} ${args.join(' ')}`, { stdio: "inherit", ...options });
+    execFileSync(command, args, { stdio: "inherit", ...options });
   } catch (err) {
     console.error(`Error running command "${command} ${args.join(' ')}": ${err.message}`);
     process.exit(1);
@@ -66,7 +66,12 @@ function cleanUp() {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
-      runCommand('npx', ['rimraf', itemPath]);
+      try {
+        runCommand('npx', ['rimraf', itemPath]);
+      } catch (err) {
+        console.error(`Failed to remove ${itemPath} using rimraf: ${err.message}`);
+        process.exit(1);
+      }
     }
   });
 }

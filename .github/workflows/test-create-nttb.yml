@@ -21,10 +21,6 @@ jobs:
     - name: Install create-nttb globally
       run: npm install -g .
 
-    - name: List Installed Packages
-      run: |
-        ls -la node_modules/.bin
-
     - name: Test create-nttb command with npx
       run: |
         npx create-nttb test-app

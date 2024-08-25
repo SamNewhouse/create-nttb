@@ -43,12 +43,11 @@ function updatePackageJson() {
   const packageJsonPath = path.join(projectPath, "package.json");
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
-  // Remove unwanted fields and update required fields
   const updatedPackageJson = {
     ...packageJson,
-    name: "app",
+    name: projectName,
     version: "1.0.0",
-    description: "create-nttb app description",
+    description: `${projectName} app description`,
   };
   delete updatedPackageJson.author;
   delete updatedPackageJson.bin;
@@ -67,7 +66,7 @@ function cleanUp() {
   console.log("Installing rimraf...");
   runCommand('npm', ['install', 'rimraf']);
 
-  const rimraf = require('rimraf');  // Import rimraf after installation
+  const rimraf = require('rimraf');
 
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);

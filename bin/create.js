@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -20,9 +20,7 @@ function createProjectDirectory() {
     fs.mkdirSync(projectPath);
   } catch (err) {
     if (err.code === "EEXIST") {
-      console.error(
-        `The directory "${projectName}" already exists. Please choose another name.`
-      );
+      console.error(`The directory "${projectName}" already exists. Please choose another name.`);
     } else {
       console.error(`Error creating directory: ${err.message}`);
     }
@@ -30,11 +28,11 @@ function createProjectDirectory() {
   }
 }
 
-function runCommand(command, options = {}) {
+function runCommand(command, args = [], options = {}) {
   try {
-    execSync(command, { stdio: "inherit", ...options });
+    execFileSync(command, args, { stdio: "inherit", ...options });
   } catch (err) {
-    console.error(`Error running command "${command}": ${err.message}`);
+    console.error(`Error running command "${command} ${args.join(' ')}": ${err.message}`);
     process.exit(1);
   }
 }
@@ -43,12 +41,11 @@ function updatePackageJson() {
   const packageJsonPath = path.join(projectPath, "package.json");
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
-  // Remove unwanted fields and update required fields
   const updatedPackageJson = {
     ...packageJson,
-    name: "app",
+    name: projectName,
     version: "1.0.0",
-    description: "create-nttb app description",
+    description: `${projectName} app description`,
   };
   delete updatedPackageJson.author;
   delete updatedPackageJson.bin;
@@ -64,11 +61,17 @@ function cleanUp() {
     "renovate.json"
   ];
 
+  console.log("Cleaning up project...");
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
-      runCommand(`npx rimraf ${itemPath}`);
+      try {
+        runCommand('npx', ['rimraf', itemPath]);
+      } catch (err) {
+        console.error(`Failed to remove ${itemPath} using rimraf: ${err.message}`);
+        process.exit(1);
+      }
     }
   });
 }
@@ -77,9 +80,12 @@ async function main() {
   createProjectDirectory();
 
   console.log("Cloning repository...");
-  runCommand(`git clone --depth 1 ${gitRepo} ${projectPath}`);
+  runCommand('git', ['clone', '--depth', '1', gitRepo, projectPath]);
 
   process.chdir(projectPath);
+
+  console.log("Installing dependencies...");
+  runCommand('npm', ['install']);
 
   cleanUp();
 
@@ -87,9 +93,6 @@ async function main() {
     console.log("Updating package.json...");
     updatePackageJson();
   }
-
-  console.log("Installing dependencies...");
-  runCommand("npm install");
 
   console.log("Installed create-nttb successfully. Enjoy!");
 }

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-const { execFileSync } = require("child_process");
+const spawn = require('cross-spawn');
 const path = require("path");
 const fs = require("fs");
+const { execSync } = require("child_process"); // Import execSync
 
 if (process.argv.length < 3) {
   console.error("Please provide a name for your application.");
@@ -29,10 +30,9 @@ function createProjectDirectory() {
 }
 
 function runCommand(command, args = [], options = {}) {
-  try {
-    execFileSync(command, args, { stdio: "inherit", ...options });
-  } catch (err) {
-    console.error(`Error running command "${command} ${args.join(' ')}": ${err.message}`);
+  const result = spawn.sync(command, args, { stdio: "inherit", ...options });
+  if (result.error) {
+    console.error(`Error running command "${command} ${args.join(' ')}": ${result.error.message}`);
     process.exit(1);
   }
 }
@@ -92,6 +92,15 @@ async function main() {
   if (fs.existsSync("package.json")) {
     console.log("Updating package.json...");
     updatePackageJson();
+  }
+
+  console.log("Uninstalling cross-spawn from the new project...");
+
+  try {
+    execSync('npm uninstall cross-spawn', { stdio: 'inherit', cwd: projectPath });
+  } catch (error) {
+    console.error(`Error uninstalling cross-spawn: ${error.message}`);
+    process.exit(1);
   }
 
   console.log("Installed create-nttb successfully. Enjoy!");

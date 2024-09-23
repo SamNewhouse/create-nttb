@@ -3,6 +3,7 @@
 const spawn = require('cross-spawn');
 const path = require("path");
 const fs = require("fs");
+const { execSync } = require("child_process"); // Import execSync
 
 if (process.argv.length < 3) {
   console.error("Please provide a name for your application.");
@@ -94,7 +95,13 @@ async function main() {
   }
 
   console.log("Uninstalling cross-spawn from the new project...");
-  runCommand('npm', ['uninstall', 'cross-spawn'], { cwd: projectPath });
+
+  try {
+    execSync('npm uninstall cross-spawn', { stdio: 'inherit', cwd: projectPath });
+  } catch (error) {
+    console.error(`Error uninstalling cross-spawn: ${error.message}`);
+    process.exit(1);
+  }
 
   console.log("Installed create-nttb successfully. Enjoy!");
 }

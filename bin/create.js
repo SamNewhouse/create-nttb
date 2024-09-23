@@ -80,7 +80,7 @@ async function main() {
   createProjectDirectory();
 
   console.log("Cloning repository...");
-  runCommand('git', ['clone', '--depth', '1', '-b', 'cross-spawn', gitRepo, projectPath]);
+  runCommand('git', ['clone', '--depth', '1', gitRepo, projectPath]);
 
   process.chdir(projectPath);
 

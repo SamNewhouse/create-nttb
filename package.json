@@ -1,6 +1,6 @@
 {
   "name": "create-nttb",
-  "version": "2.7.4",
+  "version": "2.7.5",
   "description": "An opinionated NextJs, Typescript and Tailwind boilerplate using the Atomic Design Methodology for presentation components",
   "keywords": [
     "create-nttb",

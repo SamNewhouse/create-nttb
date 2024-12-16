@@ -1,7 +1,8 @@
 {
   "name": "create-nttb",
-  "version": "2.7.6",
+  "version": "2.7.7",
   "description": "An opinionated NextJs, Typescript and Tailwind boilerplate using the Atomic Design Methodology for presentation components",
+  "license": "ISC",
   "keywords": [
     "create-nttb",
     "nextjs",
@@ -31,6 +32,7 @@
     "typescript": "5.5.4"
   },
   "author": "Sam Newhouse (https://github.com/SamNewhouse)",
+  "repository": "github:SamNewhouse/create-nttb",
   "bin": {
     "create": "./bin/create.js"
   }

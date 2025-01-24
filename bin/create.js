@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
-const spawn = require('cross-spawn');
+const { execSync, execFileSync, spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-const { execSync } = require("child_process"); // Import execSync
 
 if (process.argv.length < 3) {
   console.error("Please provide a name for your application.");
@@ -30,9 +29,13 @@ function createProjectDirectory() {
 }
 
 function runCommand(command, args = [], options = {}) {
-  const result = spawn.sync(command, args, { stdio: "inherit", ...options });
+  const result = spawnSync(command, args, { stdio: "inherit", ...options });
   if (result.error) {
     console.error(`Error running command "${command} ${args.join(' ')}": ${result.error.message}`);
+    process.exit(1);
+  }
+  if (result.status !== 0) {
+    console.error(`Command "${command} ${args.join(' ')}" failed with exit code ${result.status}`);
     process.exit(1);
   }
 }
@@ -67,7 +70,7 @@ function cleanUp() {
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
       try {
-        runCommand('npx', ['rimraf', itemPath]);
+        execFileSync('npx', ['rimraf', itemPath], { stdio: "inherit", cwd: projectPath });
       } catch (err) {
         console.error(`Failed to remove ${itemPath} using rimraf: ${err.message}`);
         process.exit(1);
@@ -92,15 +95,6 @@ async function main() {
   if (fs.existsSync("package.json")) {
     console.log("Updating package.json...");
     updatePackageJson();
-  }
-
-  console.log("Uninstalling cross-spawn from the new project...");
-
-  try {
-    execSync('npm uninstall cross-spawn', { stdio: 'inherit', cwd: projectPath });
-  } catch (error) {
-    console.error(`Error uninstalling cross-spawn: ${error.message}`);
-    process.exit(1);
   }
 
   console.log("Installed create-nttb successfully. Enjoy!");

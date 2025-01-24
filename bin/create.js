@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { execSync, spawnSync } = require("child_process");
+const { execSync, execFileSync, spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -70,7 +70,7 @@ function cleanUp() {
     if (fs.existsSync(itemPath)) {
       console.log(`Removing ${itemPath}...`);
       try {
-        execSync(`npx rimraf ${itemPath}`, { stdio: "inherit", cwd: projectPath });
+        execFileSync('npx', ['rimraf', itemPath], { stdio: "inherit", cwd: projectPath });
       } catch (err) {
         console.error(`Failed to remove ${itemPath} using rimraf: ${err.message}`);
         process.exit(1);

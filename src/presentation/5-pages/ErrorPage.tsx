@@ -25,14 +25,11 @@ const ErrorPage: NextPage<Props> = ({ statusCode }) => {
   );
 };
 
-ErrorPage.getInitialProps = async ({ res, err }): Promise<Props> => {
-  const statusCode = !(res && res.statusCode)
-    ? err && err.statusCode
-      ? err.statusCode
-      : null
-    : res.statusCode;
-
-  return { statusCode };
+export const getServerSideProps = async ({ res, err }: any) => {
+  const statusCode = res?.statusCode || err?.statusCode || 500;
+  return {
+    props: { statusCode },
+  };
 };
 
 export default ErrorPage;

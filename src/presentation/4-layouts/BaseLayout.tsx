@@ -9,7 +9,7 @@ const BaseLayout: FC<Props> = ({ children, className }) => {
   return (
     <>
       <div
-        className={`max-w-screen-lg mx-auto${className ? " " + className : ""}`}
+        className={`max-w-(--breakpoint-lg) mx-auto${className ? " " + className : ""}`}
       >
         {children}
       </div>

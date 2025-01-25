@@ -1,12 +1,20 @@
-import { NextPage } from "next";
+import { GetServerSideProps, InferGetServerSidePropsType, NextPage } from "next";
 import BaseLayout from "../4-layouts/BaseLayout";
 import React from "react";
 
-interface Props {
-  statusCode: number | null;
-}
+type ErrorProps = {
+  statusCode: number;
+};
 
-const ErrorPage: NextPage<Props> = ({ statusCode }) => {
+export const getServerSideProps = (async ({ res }) => {
+  const statusCode = res?.statusCode || 500;
+
+  return { props: { statusCode } };
+}) satisfies GetServerSideProps<{ statusCode: number }>;
+
+const ErrorPage: NextPage<ErrorProps> = ({
+  statusCode,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <>
       <BaseLayout className="error">
@@ -23,13 +31,6 @@ const ErrorPage: NextPage<Props> = ({ statusCode }) => {
       </BaseLayout>
     </>
   );
-};
-
-export const getServerSideProps = async ({ res, err }: any) => {
-  const statusCode = res?.statusCode || err?.statusCode || 500;
-  return {
-    props: { statusCode },
-  };
 };
 
 export default ErrorPage;

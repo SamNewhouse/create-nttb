@@ -27,7 +27,7 @@
     "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
     "tailwindcss": "4.1.10",
-    "typescript": "5.7.3"
+    "typescript": "5.8.3"
   },
   "author": "Sam Newhouse (https://github.com/SamNewhouse)",
   "repository": "github:SamNewhouse/create-nttb",

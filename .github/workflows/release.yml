@@ -9,7 +9,7 @@ on:
       - "renovate.json"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   create-release-and-publish:

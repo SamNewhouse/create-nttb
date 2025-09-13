@@ -8,7 +8,7 @@ on:
       - "renovate.json"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   check_version:

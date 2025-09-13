@@ -65,6 +65,7 @@ jobs:
           git config --global user.email "hello@samnewhouse.co.uk"
           git add package.json package-lock.json
           git commit -m "Changed version to ${{ env.new_version }}"
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/SamNewhouse/create-nttb.git
           git pull --rebase origin ${{ github.head_ref }}
           git push origin HEAD:${{ github.head_ref }}
         env:

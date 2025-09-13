@@ -5,37 +5,42 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v5
-      with:
-        node-version: '22'
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "lts/*"
+          cache: "npm"
 
-    - name: Install create-nttb globally
-      run: npm install -g .
+      - name: Install create-nttb globally
+        run: npm install -g .
 
-    - name: List Installed Packages
-      run: npm list -g
+      - name: List Installed Packages
+        run: npm list -g
 
-    - name: Test create-nttb command with npx
-      run: |
-        npx create-nttb test-app
+      - name: Test create-nttb command with npx
+        run: |
+          set -e
+          npx create-nttb test-app
 
-        if [ ! -d "test-app" ]; then
-          echo "Error: test-app directory was not created."
-          exit 1
-        fi
+          if [ ! -d "test-app" ]; then
+            echo "Error: test-app directory was not created."
+            exit 1
+          fi
 
-        if [ ! -f "test-app/package.json" ]; then
-          echo "Error: package.json file was not found in test-app."
-          exit 1
-        fi
+          if [ ! -f "test-app/package.json" ]; then
+            echo "Error: package.json file was not found in test-app."
+            exit 1
+          fi
 
-        rm -rf test-app
+          rm -rf test-app

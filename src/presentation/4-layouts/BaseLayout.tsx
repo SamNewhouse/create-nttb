@@ -1,4 +1,4 @@
-import React, { FC, memo, PropsWithChildren, ReactNode } from "react";
+import { FC, memo, PropsWithChildren, ReactNode } from "react";
 
 interface Props {
   children?: ReactNode;
@@ -7,13 +7,9 @@ interface Props {
 
 const BaseLayout: FC<Props> = ({ children, className }) => {
   return (
-    <>
-      <div
-        className={`max-w-(--breakpoint-lg) mx-auto${className ? " " + className : ""}`}
-      >
-        {children}
-      </div>
-    </>
+    <div className={`min-h-screen w-full ${className ?? ""}`}>
+      <div className="w-full max-w-full md:max-w-5xl mx-auto">{children}</div>
+    </div>
   );
 };
 

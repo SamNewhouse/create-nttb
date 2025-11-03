@@ -49,9 +49,6 @@ jobs:
           VERSION=$(jq -r '.version' < package.json)
           echo "VERSION=v$VERSION" >> $GITHUB_ENV
 
-      - name: Build Package
-        run: npm run build
-
       - name: Create and Publish Release
         uses: softprops/action-gh-release@v2
         with:
@@ -59,13 +56,6 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Check if NPM_TOKEN is set
-        run: |
-          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "NPM_TOKEN secret not set"
-            exit 1
-          fi
 
       - name: Configure npm for publishing
         run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}

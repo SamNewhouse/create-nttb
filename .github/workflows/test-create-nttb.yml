@@ -15,7 +15,6 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         node: ["20.x", "22.x", "24.x"]
     runs-on: ${{ matrix.os }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -25,6 +24,17 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: "npm"
+
+      - name: Check required secrets
+        run: |
+          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "NPM_TOKEN secret not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "GITHUB_TOKEN secret not set"
+            exit 1
+          fi
 
       - name: Install create-nttb globally
         run: npm install -g .

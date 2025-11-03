@@ -22,7 +22,7 @@ When the setup finishes, navigate into your new app directory and install depend
 
 ```bash
 cd app-name
-npm i
+npm install
 ```
 You’re now ready to start developing—see below for more useful commands.
 

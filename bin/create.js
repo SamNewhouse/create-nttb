@@ -15,11 +15,13 @@ const { execSync, execFileSync, spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
-// Check Node.js version (minimum v16)
-function checkNodeVersion(minMajor = 16) {
+// Check Node.js version (minimum v20)
+function checkNodeVersion(minMajor = 20) {
   const [major] = process.version.replace("v", "").split(".");
   if (Number(major) < minMajor) {
-    console.error(`❌ Node.js v${minMajor} or later is required. You are using v${process.version}`);
+    console.error(
+      `❌ Node.js v${minMajor} or later is required. You are using v${process.version}`,
+    );
     process.exit(1);
   }
 }
@@ -58,7 +60,7 @@ function createProjectDirectory() {
       // Directory exists but is empty; allow it
       return;
     }
-    console.error(`The directory "${projectName}" already exists and is not empty. Please choose another name or remove the directory.`);
+    console.error(`The directory "${projectName}" already exists and is not empty.`);
     process.exit(1);
   }
   fs.mkdirSync(projectPath);
@@ -98,6 +100,7 @@ function updatePackageJson() {
   };
   delete updatedPackageJson.author;
   delete updatedPackageJson.bin;
+  delete updatedPackageJson.files;
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(updatedPackageJson, null, 2));
 }

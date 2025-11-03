@@ -17,17 +17,15 @@ const HomePage: NextPage<Props> = () => {
             </h1>
             <h2 className="font-sans text-xl lg:text-2xl">by Sam Newhouse</h2>
             <div className="flex flex-row space-x-2">
-              <Url href="https://www.npmjs.com/package/create-nttb" className="text-md lg:text-lg">
-                <span>nmpjs</span>
-              </Url>
               <Url href="https://github.com/SamNewhouse/create-nttb" className="text-md lg:text-lg">
                 <span>github</span>
               </Url>
+              <Url href="https://www.npmjs.com/package/create-nttb" className="text-md lg:text-lg">
+                <span>nmpjs</span>
+              </Url>
             </div>
           </div>
-          <div>
-            
-          </div>
+          <div></div>
         </div>
       </BaseLayout>
     </>

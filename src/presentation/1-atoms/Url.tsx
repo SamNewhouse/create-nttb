@@ -4,7 +4,7 @@ import { FC, HTMLAttributeAnchorTarget, memo, PropsWithChildren, ReactNode } fro
 interface Props {
   children?: ReactNode;
   className?: string;
-  href: string
+  href: string;
   target?: HTMLAttributeAnchorTarget;
 }
 

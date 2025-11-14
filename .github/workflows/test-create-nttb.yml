@@ -1,19 +1,73 @@
-name: Test create-nttb Command
+name: Test create-nttb
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  cli-test:
+    name: Test CLI functionality
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install CLI globally
+        run: npm install -g .
+
+      - name: Create test app
+        run: create-nttb test-app
+
+      - name: Validate app directory exists
+        run: |
+          if [ ! -d "test-app" ]; then
+            echo "test-app directory was not created"
+            exit 1
+          fi
+
+      - name: Validate package.json
+        run: |
+          if [ ! -f "test-app/package.json" ]; then
+            echo "package.json missing"
+            exit 1
+          fi
+
+          if ! grep -q '"name": "test-app"' test-app/package.json; then
+            echo "package.json 'name' incorrect"
+            exit 1
+          fi
+
+      - name: Validate required NPM scripts
+        run: |
+          for script in build start dev; do
+            if ! grep -q "\"$script\"" test-app/package.json; then
+              echo "NPM script '$script' missing"
+              exit 1
+            fi
+          done
+
+      - name: Cleanup test folder
+        run: rm -rf test-app
+
+  unit-test:
+    name: Run Jest unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["20.x", "22.x", "24.x"]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -24,52 +78,8 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: "npm"
 
-      - name: Check required secrets
-        run: |
-          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "NPM_TOKEN secret not set"
-            exit 1
-          fi
-          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
-            echo "GITHUB_TOKEN secret not set"
-            exit 1
-          fi
+      - name: Install dependencies
+        run: npm install
 
-      - name: Install create-nttb globally
-        run: npm install -g .
-
-      - name: List Installed Packages
-        run: npm list -g
-
-      - name: "Test: Basic App Creation"
-        run: |
-          create-nttb test-app
-          if [ ! -d "test-app" ]; then
-            echo "Error: test-app directory was not created."
-            exit 1
-          fi
-          if [ ! -f "test-app/package.json" ]; then
-            echo "Error: package.json not found."
-            exit 1
-          fi
-          if ! grep -q '"name": "test-app"' test-app/package.json; then
-            echo "Error: App name not set correctly in package.json."
-            exit 1
-          fi
-
-      - name: "Test: NPM Scripts Exist"
-        run: |
-          for script in build start test; do
-            if ! grep -q "\"$script\"" test-app/package.json; then
-              echo "Error: NPM script $script missing in package.json."
-              exit 1
-            fi
-          done
-
-      - name: "Run Jest Unit Tests"
-        run: |
-          npm install
-          npx jest --verbose
-
-      - name: Cleanup
-        run: rm -rf test-app
+      - name: Run Jest tests
+        run: npx jest --verbose

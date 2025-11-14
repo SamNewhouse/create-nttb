@@ -29,22 +29,29 @@ jobs:
           git config --global user.name "SamNewhouse"
           git config --global user.email "hello@samnewhouse.co.uk"
 
-      - name: Bump package.json version if unchanged from master
+      - name: Get master version and compare
+        run: |
+          git fetch origin master
+          MASTER_VERSION=$(jq -r .version <(git show origin/master:package.json))
+          BRANCH_VERSION=$(jq -r .version package.json)
+          echo "MASTER_VERSION=$MASTER_VERSION" >> $GITHUB_ENV
+          echo "BRANCH_VERSION=$BRANCH_VERSION" >> $GITHUB_ENV
+
+      - name: Conditionally bump version ONLY IF branch == master
+        if: env.BRANCH_VERSION == env.MASTER_VERSION
         uses: phips28/gh-action-bump-version@v11.0.7
         with:
           commit-user: "SamNewhouse <hello@samnewhouse.co.uk>"
+          commit-message: "v{{version}}"
           tag-prefix: ""
-          minor-wording: ""
-          major-wording: ""
-          patch-wording: ""
-          default: "patch"
           skip-tag: true
+          default: "patch"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Success
-        run: echo "Version bump completed successfully."
+        run: echo "Version check completed successfully."
 
       - name: Failure
         if: failure()
-        run: echo "Version bump workflow failed."
+        run: echo "Version check workflow failed."

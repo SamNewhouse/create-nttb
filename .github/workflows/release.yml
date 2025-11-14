@@ -3,7 +3,7 @@ name: Create, Release & Publish to NPM
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - ".github/workflows/**"
       - "renovate.json"

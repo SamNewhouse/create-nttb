@@ -44,7 +44,7 @@ jobs:
 
       - name: Conditionally bump version ONLY IF branch == master
         if: env.BRANCH_VERSION == env.MASTER_VERSION
-        uses: phips28/gh-action-bump-version@v11.0.7
+        uses: phips28/gh-action-bump-version@v11.1.1
         with:
           commit-user: "SamNewhouse <hello@samnewhouse.co.uk>"
           commit-message: "v{{version}}"

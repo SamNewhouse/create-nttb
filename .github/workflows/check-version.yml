@@ -37,6 +37,11 @@ jobs:
           echo "MASTER_VERSION=$MASTER_VERSION" >> $GITHUB_ENV
           echo "BRANCH_VERSION=$BRANCH_VERSION" >> $GITHUB_ENV
 
+      - name: Rebase branch before bump-version
+        if: env.BRANCH_VERSION == env.MASTER_VERSION
+        run: |
+          git pull --rebase origin ${{ github.head_ref }}
+
       - name: Conditionally bump version ONLY IF branch == master
         if: env.BRANCH_VERSION == env.MASTER_VERSION
         uses: phips28/gh-action-bump-version@v11.0.7

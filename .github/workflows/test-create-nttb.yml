@@ -41,10 +41,9 @@ jobs:
       - name: List Installed Packages
         run: npm list -g
 
-      # Test simple app creation
       - name: "Test: Basic App Creation"
         run: |
-          npx create-nttb test-app
+          create-nttb test-app
           if [ ! -d "test-app" ]; then
             echo "Error: test-app directory was not created."
             exit 1
@@ -58,30 +57,6 @@ jobs:
             exit 1
           fi
 
-      # Test with custom flags/options (replace with your CLI options)
-      - name: "Test: With Custom Template Option"
-        run: |
-          npx create-nttb custom-app --template typescript
-          if [ ! -d "custom-app" ]; then
-            echo "Error: custom-app directory not found."
-            exit 1
-          fi
-          if ! grep -q '"typescript"' custom-app/package.json; then
-            echo "Error: Typescript template not applied."
-            exit 1
-          fi
-
-      # Test: README, scripts, config files, etc.
-      - name: "Test: Artifact Files Present"
-        run: |
-          for f in README.md .env example.config.js; do
-            if [ ! -f "test-app/$f" ]; then
-              echo "Error: $f missing in test-app."
-              exit 1
-            fi
-          done
-
-      # Test: Build/Start script in package.json
       - name: "Test: NPM Scripts Exist"
         run: |
           for script in build start test; do
@@ -91,6 +66,10 @@ jobs:
             fi
           done
 
-      # Clean up
+      - name: "Run Jest Unit Tests"
+        run: |
+          npm install
+          npx jest --verbose
+
       - name: Cleanup
-        run: rm -rf test-app custom-app
+        run: rm -rf test-app

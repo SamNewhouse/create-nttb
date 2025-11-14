@@ -53,7 +53,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "jest --verbose"
   },
   "dependencies": {
     "axios": "1.13.2",
@@ -63,11 +64,14 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.17",
+    "@types/jest": "30.0.0",
     "@types/node": "24.10.0",
     "@types/react": "19.2.4",
     "@types/react-dom": "19.2.3",
+    "jest": "30.2.0",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.17",
+    "ts-jest": "29.4.5",
     "typescript": "5.9.3"
   },
   "bin": {

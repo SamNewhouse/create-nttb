@@ -1,97 +1,56 @@
 #!/usr/bin/env node
 
-/**
- * create-nttb CLI installer
- *
- * Usage: npx create-nttb <project-name>
- *
- * - Clones the boilerplate repo
- * - Installs dependencies
- * - Cleans boilerplate artifacts
- * - Sets up your app with a unique name and version
- */
-
 const { execSync, execFileSync, spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
-// Check Node.js version (minimum v20)
 function checkNodeVersion(minMajor = 20) {
   const [major] = process.version.replace("v", "").split(".");
   if (Number(major) < minMajor) {
-    console.error(
-      `❌ Node.js v${minMajor} or later is required. You are using v${process.version}`,
-    );
-    process.exit(1);
+    throw new Error(`Node.js v${minMajor}+ required, current is ${process.version}`);
   }
 }
 
-// Check if Git is installed
-function checkGit() {
+function checkGitInstalled() {
   try {
     execSync("git --version", { stdio: "ignore" });
   } catch {
-    console.error("❌ Git is not installed. Please install Git first: https://git-scm.com/");
-    process.exit(1);
+    throw new Error("Git is not installed. See https://git-scm.com/");
   }
 }
 
-checkNodeVersion();
-checkGit();
-
-if (process.argv.length < 3) {
-  console.error("\nPlease provide a name for your application.");
-  console.error("For example: npx create-nttb my-app\n");
-  process.exit(1);
-}
-
-const projectName = process.argv[2];
-const currentPath = process.cwd();
-const projectPath = path.join(currentPath, projectName);
-const gitRepo = "https://github.com/SamNewhouse/create-nttb";
-
-/**
- * Creates the project directory.
- * Fails if the directory exists and is not empty.
- */
-function createProjectDirectory() {
+function createProjectDirectory(projectPath) {
   if (fs.existsSync(projectPath)) {
     if (fs.readdirSync(projectPath).length === 0) {
-      // Directory exists but is empty; allow it
       return;
     }
-    console.error(`The directory "${projectName}" already exists and is not empty.`);
-    process.exit(1);
+    throw new Error(`Directory "${projectPath}" exists and is not empty.`);
   }
   fs.mkdirSync(projectPath);
 }
 
-/**
- * Runs a shell command, throws on errors.
- * @param {string} command
- * @param {string[]} args
- * @param {object} options
- */
 function runCommand(command, args = [], options = {}) {
   const result = spawnSync(command, args, { stdio: "inherit", ...options });
   if (result.error) {
-    console.error(`Error running command "${command} ${args.join(" ")}": ${result.error.message}`);
-    process.exit(1);
+    throw new Error(
+      `Error running command "${command} ${args.join(" ")}": ${result.error.message}`,
+    );
   }
   if (result.status !== 0) {
-    console.error(`Command "${command} ${args.join(" ")}" failed with exit code ${result.status}`);
-    process.exit(1);
+    throw new Error(
+      `Command "${command} ${args.join(" ")}" failed with exit code ${result.status}`,
+    );
   }
 }
 
-/**
- * Updates package.json with project-specific info.
- * Removes bin/author from boilerplate.
- */
-function updatePackageJson() {
+function updatePackageJson(projectPath, projectName) {
   const packageJsonPath = path.join(projectPath, "package.json");
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-
+  let packageJson;
+  try {
+    packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  } catch (err) {
+    throw new Error(`Failed to read or parse package.json: ${err.message}`);
+  }
   const updatedPackageJson = {
     ...packageJson,
     name: projectName,
@@ -107,77 +66,35 @@ function updatePackageJson() {
       projectName,
     ],
   };
-  delete updatedPackageJson.author;
-  delete updatedPackageJson.bin;
-  delete updatedPackageJson.files;
-  delete updatedPackageJson.homepage;
-  delete updatedPackageJson.repository;
-  delete updatedPackageJson.bugs;
-  delete updatedPackageJson.funding;
-
+  ["author", "bin", "files", "homepage", "repository", "bugs", "funding"].forEach(
+    (k) => delete updatedPackageJson[k],
+  );
   fs.writeFileSync(packageJsonPath, JSON.stringify(updatedPackageJson, null, 2));
 }
 
-/**
- * Removes boilerplate files/directories after cloning for a clean start.
- * Tries to use rimraf; falls back to fs.rmSync if available (Node 14+).
- */
-function cleanUp() {
+function cleanUp(projectPath) {
   const pathsToRemove = [".git", ".github", "bin", "renovate.json"];
-
-  console.log("Cleaning up project...");
   pathsToRemove.forEach((item) => {
     const itemPath = path.join(projectPath, item);
     if (fs.existsSync(itemPath)) {
-      console.log(`Removing ${itemPath}...`);
       try {
-        // Use rimraf for cross-platform safety
         execFileSync("npx", ["rimraf", itemPath], { stdio: "inherit", cwd: projectPath });
       } catch (err) {
-        // Try Node's rmSync if rimraf fails
         try {
           fs.rmSync(itemPath, { recursive: true, force: true });
-        } catch {
-          console.error(`Failed to remove ${itemPath}: ${err.message}`);
-          process.exit(1);
+        } catch (e) {
+          throw new Error(`Failed to remove ${itemPath}: ${e.message}`);
         }
       }
     }
   });
 }
 
-/**
- * Main installer workflow. Clones, installs, cleans, updates, and finishes.
- */
-async function main() {
-  createProjectDirectory();
-
-  console.log("Cloning repository...");
-  runCommand("git", ["clone", "--depth", "1", gitRepo, projectPath]);
-
-  process.chdir(projectPath);
-
-  console.log("Installing dependencies...");
-  runCommand("npm", ["install"]);
-
-  cleanUp();
-
-  if (fs.existsSync("package.json")) {
-    console.log("Updating package.json...");
-    updatePackageJson();
-  }
-
-  // Helpful success message and next steps for user
-  console.log("\n✅ Installed create-nttb successfully!\n");
-  console.log(`Next steps:
-  cd ${projectName}
-  npm run dev
-  `);
-  console.log("Enjoy building with your new Next.js + Tailwind + TypeScript boilerplate!\n");
-}
-
-// Catch and display all errors with full stack/message for easier debugging
-main().catch((error) => {
-  console.error("An unexpected error occurred:", error);
-  process.exit(1);
-});
+module.exports = {
+  checkNodeVersion,
+  checkGitInstalled,
+  createProjectDirectory,
+  runCommand,
+  updatePackageJson,
+  cleanUp,
+};

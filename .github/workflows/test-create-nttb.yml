@@ -28,7 +28,7 @@ jobs:
         run: npm install
 
       - name: Create test app using local CLI
-        run: npx create-nttb test-app
+        run: npx --no-install create-nttb test-app
 
       - name: Validate app directory exists
         run: |

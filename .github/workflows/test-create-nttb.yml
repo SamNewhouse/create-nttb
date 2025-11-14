@@ -8,65 +8,12 @@ permissions:
   contents: read
 
 jobs:
-  cli-test:
-    name: Test CLI functionality
-    strategy:
-      matrix:
-        node: ["20.x", "22.x", "24.x"]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node }}
-
-      - name: Install dependencies (for bin script)
-        run: npm install
-
-      - name: Create test app using local CLI
-        run: npx --no-install create-nttb test-app
-
-      - name: Validate app directory exists
-        run: |
-          if [ ! -d "test-app" ]; then
-            echo "test-app directory was not created"
-            exit 1
-          fi
-
-      - name: Validate package.json
-        run: |
-          if [ ! -f "test-app/package.json" ]; then
-            echo "package.json missing"
-            exit 1
-          fi
-
-          if ! grep -q '"name": "test-app"' test-app/package.json; then
-            echo "package.json 'name' incorrect"
-            exit 1
-          fi
-
-      - name: Validate required NPM scripts
-        run: |
-          for script in build start dev; do
-            if ! grep -q "\"$script\"" test-app/package.json; then
-              echo "NPM script '$script' missing"
-              exit 1
-            fi
-          done
-
-      - name: Cleanup test folder
-        run: rm -rf test-app
-
   unit-test:
     name: Run Jest unit tests
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -83,3 +30,52 @@ jobs:
 
       - name: Run Jest tests
         run: npm run test
+
+  cli-test:
+    name: Test CLI installation and usage
+    strategy:
+      matrix:
+        node: ["20.x", "22.x", "24.x"]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install CLI globally
+        run: npm install -g .
+
+      - name: Create app using global CLI
+        run: create-nttb global-app
+
+      - name: Verify global-app creation
+        run: |
+          test -d global-app || { echo "global-app missing"; exit 1; }
+          test -f global-app/package.json || { echo "package.json missing"; exit 1; }
+
+      - name: Create app using *local* CLI
+        run: npx --no-install create-nttb local-app
+
+      - name: Verify local-app creation
+        run: |
+          test -d local-app || { echo "local-app missing"; exit 1; }
+          test -f local-app/package.json || { echo "package.json missing"; exit 1; }
+
+      - name: Validate NPM scripts (for both apps)
+        run: |
+          for app in global-app local-app; do
+            for script in build start dev; do
+              if ! grep -q "\"$script\"" "$app/package.json"; then
+                echo "NPM script '$script' missing in $app"
+                exit 1
+              fi
+            done
+          done
+
+      - name: Cleanup
+        run: rm -rf global-app local-app

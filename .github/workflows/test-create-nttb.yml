@@ -41,19 +41,56 @@ jobs:
       - name: List Installed Packages
         run: npm list -g
 
-      - name: Test create-nttb command with npx
+      # Test simple app creation
+      - name: "Test: Basic App Creation"
         run: |
-          set -e
           npx create-nttb test-app
-
           if [ ! -d "test-app" ]; then
             echo "Error: test-app directory was not created."
             exit 1
           fi
-
           if [ ! -f "test-app/package.json" ]; then
-            echo "Error: package.json file was not found in test-app."
+            echo "Error: package.json not found."
+            exit 1
+          fi
+          if ! grep -q '"name": "test-app"' test-app/package.json; then
+            echo "Error: App name not set correctly in package.json."
             exit 1
           fi
 
-          rm -rf test-app
+      # Test with custom flags/options (replace with your CLI options)
+      - name: "Test: With Custom Template Option"
+        run: |
+          npx create-nttb custom-app --template typescript
+          if [ ! -d "custom-app" ]; then
+            echo "Error: custom-app directory not found."
+            exit 1
+          fi
+          if ! grep -q '"typescript"' custom-app/package.json; then
+            echo "Error: Typescript template not applied."
+            exit 1
+          fi
+
+      # Test: README, scripts, config files, etc.
+      - name: "Test: Artifact Files Present"
+        run: |
+          for f in README.md .env example.config.js; do
+            if [ ! -f "test-app/$f" ]; then
+              echo "Error: $f missing in test-app."
+              exit 1
+            fi
+          done
+
+      # Test: Build/Start script in package.json
+      - name: "Test: NPM Scripts Exist"
+        run: |
+          for script in build start test; do
+            if ! grep -q "\"$script\"" test-app/package.json; then
+              echo "Error: NPM script $script missing in package.json."
+              exit 1
+            fi
+          done
+
+      # Clean up
+      - name: Cleanup
+        run: rm -rf test-app custom-app

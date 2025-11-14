@@ -75,7 +75,7 @@
     "typescript": "5.9.3"
   },
   "bin": {
-    "create": "./bin/create.js"
+    "create-nttb": "./bin/create.js"
   },
   "files": [
     "bin",

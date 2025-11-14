@@ -18,45 +18,62 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: "npm"
 
-      - name: Set git user
+      - name: Get package.json version from master branch
+        id: master_version
+        run: |
+          git fetch origin master
+          master_version=$(jq -r .version <(git show origin/master:package.json))
+          echo "master_version=$master_version" >> $GITHUB_ENV
+
+      - name: Get package.json version from current branch
+        id: current_version
+        run: |
+          branch_version=$(jq -r .version package.json)
+          echo "branch_version=$branch_version" >> $GITHUB_ENV
+
+      - name: Compare versions and update if necessary
+        id: compare_versions
+        run: |
+          if [ "$branch_version" = "$master_version" ]; then
+            IFS='.' read -r major minor patch <<< "$branch_version"
+            patch=$((patch + 1))
+            new_version="$major.$minor.$patch"
+            echo "New version: $new_version"
+            jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
+            echo "Version updated to $new_version"
+            echo "version_updated=true" >> $GITHUB_ENV
+            echo "new_version=$new_version" >> $GITHUB_ENV
+          else
+            echo "Versions are different. No update needed."
+            echo "version_updated=false" >> $GITHUB_ENV
+          fi
+
+      - name: Update version in package-lock
+        if: env.version_updated == 'true'
+        run: npm install
+
+      - name: Commit version bump
+        if: env.version_updated == 'true'
         run: |
           git config --global user.name "SamNewhouse"
           git config --global user.email "hello@samnewhouse.co.uk"
-
-      - name: Get main version and compare
-        run: |
-          git fetch origin main
-          MAIN_VERSION=$(jq -r .version <(git show origin/main:package.json))
-          BRANCH_VERSION=$(jq -r .version package.json)
-          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
-          echo "BRANCH_VERSION=$BRANCH_VERSION" >> $GITHUB_ENV
-
-      - name: Rebase branch before bump-version
-        if: env.BRANCH_VERSION == env.MAIN_VERSION
-        run: |
+          git add package.json package-lock.json
+          git commit -m "Changed version to ${{ env.new_version }}"
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/SamNewhouse/create-nttb.git
           git pull --rebase origin ${{ github.head_ref }}
-
-      - name: Conditionally bump version ONLY IF branch == main
-        if: env.BRANCH_VERSION == env.MAIN_VERSION
-        uses: phips28/gh-action-bump-version@v11.1.1
-        with:
-          commit-user: "SamNewhouse <hello@samnewhouse.co.uk>"
-          commit-message: "v{{version}}"
-          tag-prefix: ""
-          skip-tag: true
-          default: "patch"
+          git push origin HEAD:${{ github.head_ref }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Success
-        run: echo "Version check completed successfully."
+        run: echo "Version check and update workflow completed successfully."
 
       - name: Failure
         if: failure()
-        run: echo "Version check workflow failed."
+        run: echo "Version check and update workflow failed."

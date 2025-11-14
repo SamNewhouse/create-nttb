@@ -29,21 +29,21 @@ jobs:
           git config --global user.name "SamNewhouse"
           git config --global user.email "hello@samnewhouse.co.uk"
 
-      - name: Get master version and compare
+      - name: Get main version and compare
         run: |
-          git fetch origin master
-          MASTER_VERSION=$(jq -r .version <(git show origin/master:package.json))
+          git fetch origin main
+          MAIN_VERSION=$(jq -r .version <(git show origin/main:package.json))
           BRANCH_VERSION=$(jq -r .version package.json)
-          echo "MASTER_VERSION=$MASTER_VERSION" >> $GITHUB_ENV
+          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
           echo "BRANCH_VERSION=$BRANCH_VERSION" >> $GITHUB_ENV
 
       - name: Rebase branch before bump-version
-        if: env.BRANCH_VERSION == env.MASTER_VERSION
+        if: env.BRANCH_VERSION == env.MAIN_VERSION
         run: |
           git pull --rebase origin ${{ github.head_ref }}
 
-      - name: Conditionally bump version ONLY IF branch == master
-        if: env.BRANCH_VERSION == env.MASTER_VERSION
+      - name: Conditionally bump version ONLY IF branch == main
+        if: env.BRANCH_VERSION == env.MAIN_VERSION
         uses: phips28/gh-action-bump-version@v11.1.1
         with:
           commit-user: "SamNewhouse <hello@samnewhouse.co.uk>"

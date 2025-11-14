@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Tweet new release
-        uses: captradeoff/x-post-action@v1
+        uses: captradeoff/x-post-action@v1.2
         with:
           appKey: ${{ secrets.X_API_KEY }}
           appSecret: ${{ secrets.X_API_SECRET_KEY }}

@@ -28,7 +28,7 @@ jobs:
         run: npm install -g .
 
       - name: Create test app
-        run: create-nttb test-app
+        run: create nttb test-app
 
       - name: Validate app directory exists
         run: |
@@ -82,4 +82,4 @@ jobs:
         run: npm install
 
       - name: Run Jest tests
-        run: npx jest --verbose
+        run: npm run test

@@ -30,14 +30,14 @@ jobs:
           git config --global user.email "hello@samnewhouse.co.uk"
 
       - name: Bump package.json version if unchanged from master
-        uses: phips28/gh-action-bump-version@v10
+        uses: phips28/gh-action-bump-version@v11.0.7
         with:
           commit-user: "SamNewhouse <hello@samnewhouse.co.uk>"
-          tag-prefix: ''
-          minor-wording: ''
-          major-wording: ''
-          patch-wording: ''
-          default: 'patch'
+          tag-prefix: ""
+          minor-wording: ""
+          major-wording: ""
+          patch-wording: ""
+          default: "patch"
           skip-tag: true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

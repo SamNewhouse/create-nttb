@@ -1,23 +1,23 @@
-name: Post on Release
+# name: Post on Release
 
-permissions: {}
+# permissions: {}
 
-on:
-  workflow_run:
-    workflows: ["Create, Release & Publish to NPM"]
-    types:
-      - completed
+# on:
+#   workflow_run:
+#     workflows: ["Create, Release & Publish to NPM"]
+#     types:
+#       - completed
 
-jobs:
-  x:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Tweet new release
-        uses: captradeoff/x-post-action@v1.2
-        with:
-          appKey: ${{ secrets.X_API_KEY }}
-          appSecret: ${{ secrets.X_API_SECRET_KEY }}
-          accessToken: ${{ secrets.X_ACCESS_TOKEN }}
-          accessSecret: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
-          message: "🚀 create-nttb v${{ github.event.workflow_run.head_branch }} released! See details at: https://github.com/SamNewhouse/create-nttb/releases"
+# jobs:
+#   x:
+#     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Tweet new release
+#         uses: captradeoff/x-post-action@v1.2
+#         with:
+#           appKey: ${{ secrets.X_API_KEY }}
+#           appSecret: ${{ secrets.X_API_SECRET_KEY }}
+#           accessToken: ${{ secrets.X_ACCESS_TOKEN }}
+#           accessSecret: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+#           message: "🚀 create-nttb v${{ github.event.workflow_run.head_branch }} released! See details at: https://github.com/SamNewhouse/create-nttb/releases"

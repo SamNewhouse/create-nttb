@@ -14,11 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Tweet new release
-        uses: JasonEtco/tweet@v1
-        env:
-          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
-          TWITTER_API_SECRET_KEY: ${{ secrets.TWITTER_API_SECRET_KEY }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_API_SECRET_KEY }}
+        uses: captradeoff/x-post-action@v1
         with:
-          status: "🚀 create-nttb v${{ github.event.workflow_run.head_branch }} released! See details at: https://github.com/SamNewhouse/create-nttb/releases"
+          appKey: ${{ secrets.X_API_KEY }}
+          appSecret: ${{ secrets.X_API_SECRET_KEY }}
+          accessToken: ${{ secrets.X_ACCESS_TOKEN }}
+          accessSecret: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          message: "🚀 create-nttb v${{ github.event.workflow_run.head_branch }} released! See details at: https://github.com/SamNewhouse/create-nttb/releases"

@@ -97,10 +97,23 @@ function updatePackageJson() {
     name: projectName,
     version: "1.0.0",
     description: `${projectName} app description`,
+    keywords: [
+      "create-nttb",
+      "nextjs",
+      "react",
+      "typescript",
+      "tailwindcss",
+      "boilerplate",
+      projectName,
+    ],
   };
   delete updatedPackageJson.author;
   delete updatedPackageJson.bin;
   delete updatedPackageJson.files;
+  delete updatedPackageJson.homepage;
+  delete updatedPackageJson.repository;
+  delete updatedPackageJson.bugs;
+  delete updatedPackageJson.funding;
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(updatedPackageJson, null, 2));
 }

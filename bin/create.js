@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-const { execSync, execFileSync, spawnSync } = require("child_process");
+const { execSync, spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
 function checkNodeVersion(minMajor = 20) {
   const [major] = process.version.replace("v", "").split(".");
   if (Number(major) < minMajor) {
-    throw new Error(`Node.js v${minMajor}+ required, current is ${process.version}`);
+    throw new Error(`Node.js v${minMajor}+ required`);
   }
 }
 
@@ -21,38 +21,43 @@ function checkGitInstalled() {
 
 function createProjectDirectory(projectPath) {
   if (fs.existsSync(projectPath)) {
-    if (fs.readdirSync(projectPath).length === 0) {
-      return;
-    }
+    if (fs.readdirSync(projectPath).length === 0) return;
     throw new Error(`Directory "${projectPath}" exists and is not empty.`);
   }
-  fs.mkdirSync(projectPath);
+  fs.mkdirSync(projectPath, { recursive: true });
 }
 
 function runCommand(command, args = [], options = {}) {
-  const result = spawnSync(command, args, { stdio: "inherit", ...options });
+  const result = spawnSync(command, args, {
+    stdio: "inherit",
+    ...options,
+  });
+
   if (result.error) {
-    throw new Error(
-      `Error running command "${command} ${args.join(" ")}": ${result.error.message}`,
-    );
+    throw new Error(`Error running command "${command}": ${result.error.message}`);
   }
+
   if (result.status !== 0) {
-    throw new Error(
-      `Command "${command} ${args.join(" ")}" failed with exit code ${result.status}`,
-    );
+    const stderr = result.stderr ? String(result.stderr) : "";
+    if (stderr) {
+      throw new Error(stderr);
+    }
+    throw new Error(`exit code ${result.status}`);
   }
 }
 
 function updatePackageJson(projectPath, projectName) {
-  const packageJsonPath = path.join(projectPath, "package.json");
-  let packageJson;
+  const file = path.join(projectPath, "package.json");
+
+  let pkg;
   try {
-    packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    pkg = JSON.parse(fs.readFileSync(file, "utf8"));
   } catch (err) {
     throw new Error(`Failed to read or parse package.json: ${err.message}`);
   }
-  const updatedPackageJson = {
-    ...packageJson,
+
+  const updated = {
+    ...pkg,
     name: projectName,
     version: "1.0.0",
     description: `${projectName} app description`,
@@ -66,28 +71,27 @@ function updatePackageJson(projectPath, projectName) {
       projectName,
     ],
   };
-  ["author", "bin", "files", "homepage", "repository", "bugs", "funding"].forEach(
-    (k) => delete updatedPackageJson[k],
-  );
-  fs.writeFileSync(packageJsonPath, JSON.stringify(updatedPackageJson, null, 2));
+
+  for (const key of ["author", "bin", "files", "homepage", "repository", "bugs", "funding"]) {
+    delete updated[key];
+  }
+
+  fs.writeFileSync(file, JSON.stringify(updated, null, 2));
 }
 
 function cleanUp(projectPath) {
-  const pathsToRemove = [".git", ".github", "bin", "renovate.json"];
-  pathsToRemove.forEach((item) => {
-    const itemPath = path.join(projectPath, item);
-    if (fs.existsSync(itemPath)) {
-      try {
-        execFileSync("npx", ["rimraf", itemPath], { stdio: "inherit", cwd: projectPath });
-      } catch (err) {
-        try {
-          fs.rmSync(itemPath, { recursive: true, force: true });
-        } catch (e) {
-          throw new Error(`Failed to remove ${itemPath}: ${e.message}`);
-        }
-      }
+  const targets = [".git", ".github", "bin", "renovate.json"];
+
+  for (const item of targets) {
+    const targetPath = path.join(projectPath, item);
+    if (!fs.existsSync(targetPath)) continue;
+
+    try {
+      fs.rmSync(targetPath, { recursive: true, force: true });
+    } catch (err) {
+      throw new Error(`Failed to remove ${item}: ${err.message}`);
     }
-  });
+  }
 }
 
 module.exports = {

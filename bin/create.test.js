@@ -1,6 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+
+jest.mock("child_process", () => ({
+  execSync: jest.fn(),
+  execFileSync: jest.fn(),
+  spawnSync: jest.fn(),
+}));
+
+const child = require("child_process");
+
 const {
   checkNodeVersion,
   checkGitInstalled,
@@ -13,111 +22,211 @@ const {
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "create-nttb-"));
 }
-function getPkg(projectPath) {
-  return JSON.parse(fs.readFileSync(path.join(projectPath, "package.json"), "utf8"));
+function readPkg(dir) {
+  return JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf8"));
 }
 
 describe("create-nttb helpers", () => {
   let tempDir;
-  let testProject;
-  const projectName = "jest-app";
+  let projectDir;
+  const name = "jest-app";
 
   beforeEach(() => {
     tempDir = makeTempDir();
-    testProject = path.join(tempDir, projectName);
+    projectDir = path.join(tempDir, name);
   });
 
   afterEach(() => {
-    try {
-      fs.rmSync(tempDir, { recursive: true, force: true });
-    } catch {}
+    fs.rmSync(tempDir, { recursive: true, force: true });
   });
 
-  test("checkNodeVersion throws for low version", () => {
-    const original = process.version;
-    Object.defineProperty(process, "version", { value: "v10.0.0" });
-    expect(() => checkNodeVersion(20)).toThrow(/Node\.js v20\+ required/);
-    Object.defineProperty(process, "version", { value: original });
-  });
+  describe("checkNodeVersion", () => {
+    test("throws for low version", () => {
+      const original = process.version;
+      Object.defineProperty(process, "version", { value: "v10.0.0" });
+      expect(() => checkNodeVersion(20)).toThrow(/Node\.js v20\+ required/);
+      Object.defineProperty(process, "version", { value: original });
+    });
 
-  test("checkNodeVersion passes for high version", () => {
-    expect(() => checkNodeVersion(10)).not.toThrow();
-  });
+    test("passes for high version", () => {
+      expect(() => checkNodeVersion(10)).not.toThrow();
+    });
 
-  test("checkGitInstalled throws if git not present", () => {
-    // This can't really be tested without impacting your dev env.
-    // You could mock execSync here, or skip this test.
-    // Skipping for safety.
-    expect(typeof checkGitInstalled).toBe("function");
-  });
-
-  test("createProjectDirectory creates dirs, rejects nonempty", () => {
-    expect(fs.existsSync(testProject)).toBe(false);
-    createProjectDirectory(testProject);
-    expect(fs.existsSync(testProject)).toBe(true);
-    // Should allow empty dir
-    expect(() => createProjectDirectory(testProject)).not.toThrow();
-    // Should throw for nonempty dir
-    fs.writeFileSync(path.join(testProject, "file.txt"), "hi");
-    expect(() => createProjectDirectory(testProject)).toThrow(/exists and is not empty/);
-  });
-
-  test("runCommand throws on bad command", () => {
-    expect(() => runCommand("does_not_exist_command")).toThrow(/Error running command/);
-  });
-
-  test("updatePackageJson updates and cleans package.json", () => {
-    fs.mkdirSync(testProject);
-    const pkg = {
-      name: "boilerplate",
-      version: "0.9.0",
-      author: "Me",
-      bin: { test: "bin/cli.js" },
-      homepage: "old",
-      repository: { url: "repo" },
-      bugs: {},
-      files: ["lib"],
-      funding: {},
-      keywords: [],
-    };
-    fs.writeFileSync(path.join(testProject, "package.json"), JSON.stringify(pkg));
-    updatePackageJson(testProject, projectName);
-    const updated = getPkg(testProject);
-    expect(updated.name).toBe(projectName);
-    expect(updated.version).toBe("1.0.0");
-    expect(updated.author).toBeUndefined();
-    expect(updated.bin).toBeUndefined();
-    expect(updated.funding).toBeUndefined();
-    expect(updated.keywords).toContain(projectName);
-  });
-
-  test("updatePackageJson throws on corrupt package.json", () => {
-    fs.mkdirSync(testProject);
-    fs.writeFileSync(path.join(testProject, "package.json"), "{foo:");
-    expect(() => updatePackageJson(testProject, projectName)).toThrow(/Failed to read or parse/);
-  });
-
-  test("cleanUp removes known boilerplate files", () => {
-    fs.mkdirSync(testProject);
-    process.chdir(testProject);
-    [".git", ".github", "bin"].forEach((f) => fs.mkdirSync(f));
-    fs.writeFileSync("renovate.json", "{}");
-    expect(fs.existsSync(".git")).toBe(true);
-    cleanUp(testProject);
-    [".git", ".github", "bin", "renovate.json"].forEach((f) => {
-      expect(fs.existsSync(f)).toBe(false);
+    test("handles exact required version", () => {
+      const original = process.version;
+      Object.defineProperty(process, "version", { value: "v20.0.0" });
+      expect(() => checkNodeVersion(20)).not.toThrow();
+      Object.defineProperty(process, "version", { value: original });
     });
   });
 
-  test("cleanUp throws if path can't be removed", () => {
-    fs.mkdirSync(testProject);
-    process.chdir(testProject);
-    fs.mkdirSync(".github");
-    fs.chmodSync(".github", 0o000);
-    try {
-      expect(() => cleanUp(testProject)).toThrow(/Failed to remove/);
-    } finally {
-      fs.chmodSync(".github", 0o755);
-    }
+  describe("checkGitInstalled", () => {
+    test("passes when git is present", () => {
+      child.execSync.mockImplementation(() => {});
+      expect(() => checkGitInstalled()).not.toThrow();
+    });
+
+    test("throws when git missing", () => {
+      child.execSync.mockImplementation(() => {
+        throw new Error("git missing");
+      });
+      expect(() => checkGitInstalled()).toThrow(/Git is not installed/);
+    });
+
+    test("throws on exec failure", () => {
+      child.execSync.mockImplementation(() => {
+        throw new Error("fail");
+      });
+      expect(() => checkGitInstalled()).toThrow();
+    });
+  });
+
+  describe("createProjectDirectory", () => {
+    test("creates empty directory", () => {
+      expect(fs.existsSync(projectDir)).toBe(false);
+      createProjectDirectory(projectDir);
+      expect(fs.existsSync(projectDir)).toBe(true);
+    });
+
+    test("allows re-run on empty directory", () => {
+      createProjectDirectory(projectDir);
+      expect(() => createProjectDirectory(projectDir)).not.toThrow();
+    });
+
+    test("throws if not empty", () => {
+      createProjectDirectory(projectDir);
+      fs.writeFileSync(path.join(projectDir, "file.txt"), "x");
+      expect(() => createProjectDirectory(projectDir)).toThrow(/not empty/);
+    });
+
+    test("throws if path is a file", () => {
+      fs.writeFileSync(projectDir, "x");
+      expect(() => createProjectDirectory(projectDir)).toThrow();
+    });
+
+    test("creates nested directories", () => {
+      const nested = path.join(tempDir, "a/b/c");
+      createProjectDirectory(nested);
+      expect(fs.existsSync(nested)).toBe(true);
+    });
+  });
+
+  describe("runCommand", () => {
+    afterEach(() => child.spawnSync.mockReset());
+
+    test("throws on spawn error", () => {
+      child.spawnSync.mockImplementation(() => ({ error: new Error("bad cmd") }));
+      expect(() => runCommand("bad")).toThrow(/Error running command/);
+    });
+
+    test("throws on nonzero exit code", () => {
+      child.spawnSync.mockReturnValue({ status: 2 });
+      expect(() => runCommand("fail")).toThrow(/exit code 2/);
+    });
+
+    test("passes on zero exit code", () => {
+      child.spawnSync.mockReturnValue({ status: 0 });
+      expect(() => runCommand("ok")).not.toThrow();
+    });
+
+    test("passes stderr through", () => {
+      child.spawnSync.mockReturnValue({ status: 3, stderr: "err" });
+      expect(() => runCommand("cmd")).toThrow(/err/);
+    });
+  });
+
+  describe("updatePackageJson", () => {
+    test("updates fields", () => {
+      fs.mkdirSync(projectDir);
+
+      const pkg = {
+        name: "starter",
+        version: "0.1.0",
+        author: "a",
+        bin: {},
+        homepage: "h",
+        repository: "r",
+        bugs: {},
+        files: [],
+        funding: {},
+        keywords: [],
+      };
+
+      fs.writeFileSync(path.join(projectDir, "package.json"), JSON.stringify(pkg));
+      updatePackageJson(projectDir, name);
+
+      const updated = readPkg(projectDir);
+
+      expect(updated.name).toBe(name);
+      expect(updated.version).toBe("1.0.0");
+      expect(updated.description).toBe(`${name} app description`);
+      expect(updated.keywords).toHaveLength(7);
+
+      ["author", "bin", "homepage", "files", "repository", "bugs", "funding"].forEach((k) =>
+        expect(updated[k]).toBeUndefined(),
+      );
+    });
+
+    test("throws on invalid json", () => {
+      fs.mkdirSync(projectDir);
+      fs.writeFileSync(path.join(projectDir, "package.json"), "{bad:");
+      expect(() => updatePackageJson(projectDir, name)).toThrow(/Failed to read or parse/);
+    });
+
+    test("keeps unknown fields", () => {
+      fs.mkdirSync(projectDir);
+      fs.writeFileSync(
+        path.join(projectDir, "package.json"),
+        JSON.stringify({ name: "x", custom: 123 }),
+      );
+
+      updatePackageJson(projectDir, name);
+      const updated = readPkg(projectDir);
+
+      expect(updated.custom).toBe(123);
+    });
+  });
+
+  describe("cleanUp", () => {
+    test("removes boilerplate files", () => {
+      fs.mkdirSync(projectDir);
+      const cwd = process.cwd();
+      process.chdir(projectDir);
+
+      [".git", ".github", "bin"].forEach((d) => fs.mkdirSync(d));
+      fs.writeFileSync("renovate.json", "{}");
+
+      child.execFileSync.mockImplementation(() => {
+        throw new Error("no rimraf");
+      });
+
+      cleanUp(projectDir);
+
+      [".git", ".github", "bin", "renovate.json"].forEach((d) =>
+        expect(fs.existsSync(d)).toBe(false),
+      );
+
+      process.chdir(cwd);
+    });
+
+    test("quietly skips missing files", () => {
+      fs.mkdirSync(projectDir);
+      child.execFileSync.mockImplementation(() => {
+        throw new Error("skip");
+      });
+
+      expect(() => cleanUp(projectDir)).not.toThrow();
+    });
+
+    test("uses rimraf when available", () => {
+      fs.mkdirSync(projectDir);
+      fs.mkdirSync(path.join(projectDir, ".git"));
+
+      child.execFileSync.mockImplementation(() => {});
+
+      cleanUp(projectDir);
+
+      expect(fs.existsSync(path.join(projectDir, ".git"))).toBe(false);
+    });
   });
 });

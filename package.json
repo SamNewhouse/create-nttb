@@ -1,16 +1,53 @@
 {
   "name": "create-nttb",
-  "version": "4.1.5",
-  "description": "An opinionated NextJs, Typescript and Tailwind boilerplate using the Atomic Design Methodology for presentation components",
+  "version": "4.2.0",
+  "description": "An opinionated Next.js, TypeScript, and Tailwind boilerplate using Atomic Design Methodology for presentation components.",
   "license": "ISC",
   "keywords": [
     "create-nttb",
     "nextjs",
+    "react",
+    "reactjs",
     "typescript",
+    "javascript",
     "tailwindcss",
     "boilerplate",
-    "atomic-design"
+    "starter",
+    "starter-kit",
+    "template",
+    "atomic-design",
+    "cli",
+    "frontend",
+    "ssr",
+    "ssg",
+    "scaffolding",
+    "fullstack",
+    "modern-js",
+    "component-library",
+    "webdev",
+    "ecosystem",
+    "open-source",
+    "production-ready",
+    "rapid-development",
+    "developer-experience",
+    "opinionated",
+    "best-practices",
+    "monorepo",
+    "structure",
+    "optimised",
+    "code-quality",
+    "scalability",
+    "customization",
+    "integration",
+    "hooks",
+    "vercel",
+    "create",
+    "easy"
   ],
+  "readme": "README.md",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,7 +56,7 @@
   },
   "dependencies": {
     "axios": "1.13.2",
-    "next": "16.0.2",
+    "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
@@ -32,8 +69,6 @@
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3"
   },
-  "author": "Sam Newhouse (https://github.com/SamNewhouse)",
-  "repository": "github:SamNewhouse/create-nttb",
   "bin": {
     "create": "./bin/create.js"
   },
@@ -42,5 +77,21 @@
     "README.md",
     "LICENSE",
     "package.json"
-  ]
+  ],
+  "homepage": "https://github.com/SamNewhouse/create-nttb",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SamNewhouse/create-nttb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SamNewhouse/create-nttb/issues"
+  },
+  "author": {
+    "name": "Sam Newhouse",
+    "url": "https://github.com/SamNewhouse"
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/SamNewhouse"
+  }
 }

@@ -24,11 +24,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install CLI globally
-        run: npm install -g .
+      - name: Install dependencies (for bin script)
+        run: npm install
 
-      - name: Create test app
-        run: create nttb test-app
+      - name: Create test app using local CLI
+        run: npx create-nttb test-app
 
       - name: Validate app directory exists
         run: |

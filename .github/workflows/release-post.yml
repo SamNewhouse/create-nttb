@@ -1,5 +1,7 @@
 name: Post on Release
 
+permissions: {}
+
 on:
   release:
     types: [published]

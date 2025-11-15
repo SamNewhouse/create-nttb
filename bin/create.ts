@@ -115,7 +115,13 @@ export async function main(): Promise<void> {
   doneStep();
   process.chdir(projectPath);
   step("Installing packages");
-  runCommand("npm", ["install", "--silent"]);
+  const skipInstall = process.argv.includes("--skip-install");
+
+  if (!skipInstall) {
+    step("Installing packages");
+    runCommand("npm", ["install", "--silent"]);
+    doneStep();
+  }
   doneStep();
   step("Cleaning up");
   cleanUp(projectPath);

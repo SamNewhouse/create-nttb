@@ -67,7 +67,7 @@ jobs:
 
       - name: Build and publish package
         run: |
-          npm ci  # install all dependencies to ensure build works
+          npm ci
           npm run build:cli
           npm publish --access public
         env:

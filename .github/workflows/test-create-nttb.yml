@@ -9,87 +9,56 @@ permissions:
 
 jobs:
   cli-unit-test:
-    name: Run CLI Unit tests
+    name: CLI Unit Test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run CLI unit tests
-        run: npm run test:cli
+      - run: npm install
+      - run: npm run test:cli
 
   cli-integration-test:
-    name: Test CLI Integration test
-    needs: cli-unit-test
+    name: CLI Integration Test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build CLI
-        run: npm run build:cli
-
-      - name: Link CLI globally
-        run: npm link
-
-      - name: Create and verify project
-        run: |
+      - run: npm install
+      - run: npm run build:cli
+      - run: npm link
+      - run: |
           npx create-nttb global-app || exit 1
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
-
-      - name: Validate NPM scripts
-        run: |
+      - run: |
           for script in build start dev; do
             if ! grep -q "\"$script\"" "global-app/package.json"; then
               echo "NPM script '$script' missing in global-app"
               exit 1
             fi
           done
-
-      - name: Cleanup project
-        run: rm -rf global-app
+      - run: rm -rf global-app
 
   next-unit-test:
-    name: Run Next.js Jest tests
-    needs: cli-integration-test
+    name: Next.js Jest Unit Test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Next.js unit tests
-        run: npm run test
+      - run: npm install
+      - run: npm run test

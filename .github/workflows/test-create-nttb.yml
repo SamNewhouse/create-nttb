@@ -51,12 +51,14 @@ jobs:
       - name: Build CLI
         run: npm run build:cli
 
-      - name: Create and verify project
+      - name: Link CLI globally
+        run: npm link
+
+      - name: Create and verify global-app
         run: |
-          PROJECT=global-app
-          node ./dist/bin/create.js $PROJECT
-          test -d $PROJECT || { echo "$PROJECT missing"; exit 1; }
-          test -f $PROJECT/package.json || { echo "package.json missing"; exit 1; }
+          npx create-nttb global-app
+          test -d global-app || { echo "global-app missing"; exit 1; }
+          test -f global-app/package.json || { echo "package.json missing"; exit 1; }
 
       - name: Validate NPM scripts
         run: |

@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   test-create-nttb:
-    name: All Tests (Node ${{ matrix.node }})
+    name: Test create-nttb CLI and Nextjs (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       matrix:

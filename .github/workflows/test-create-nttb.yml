@@ -15,10 +15,10 @@ jobs:
         node: ["20.x", "22.x", "24.x"]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
@@ -37,10 +37,10 @@ jobs:
         node: ["20.x", "22.x", "24.x"]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
@@ -54,9 +54,11 @@ jobs:
       - name: Link CLI globally
         run: npm link
 
-      - name: Create and verify global-app
+      - name: Create project with CLI
+        run: npx create-nttb global-app
+
+      - name: Verify project creation
         run: |
-          npx create-nttb global-app
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
 
@@ -69,7 +71,7 @@ jobs:
             fi
           done
 
-      - name: Cleanup
+      - name: Cleanup project
         run: rm -rf global-app
 
   next-unit-test:
@@ -79,10 +81,10 @@ jobs:
         node: ["20.x", "22.x", "24.x"]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}

@@ -56,7 +56,7 @@ jobs:
 
       - name: Create and verify global-app
         run: |
-          create-nttb global-app
+          npx create-nttb global-app
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
 

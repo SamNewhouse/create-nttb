@@ -32,6 +32,7 @@ jobs:
 
   cli-integration-test:
     name: Test CLI installation and usage
+    needs: cli-unit-test
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
@@ -76,6 +77,7 @@ jobs:
 
   next-unit-test:
     name: Run Next.js Jest tests
+    needs: cli-integration-test
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]

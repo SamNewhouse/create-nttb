@@ -13,12 +13,13 @@ permissions:
 
 jobs:
   test:
+    name: Test CLI & Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22.x"
@@ -27,32 +28,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Test CLI
+      - name: Run CLI unit tests
         run: npm run test:cli
 
-      - name: Test build
+      - name: Build CLI
         run: npm run build:cli
 
   create-release-and-publish:
+    name: Create GitHub Release & Publish to NPM
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Check out the repository
+      - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22.x"
           cache: "npm"
 
-      - name: Get the version from package.json
+      - name: Get package version
         id: get_version
         run: |
           VERSION=$(jq -r '.version' < package.json)
           echo "VERSION=v$VERSION" >> $GITHUB_ENV
 
-      - name: Create and Publish Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
@@ -63,9 +65,9 @@ jobs:
       - name: Configure npm for publishing
         run: npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
 
-      - name: Install dependencies and publish package to NPM
+      - name: Build and publish package
         run: |
-          npm ci --only=production
+          npm ci  # install all dependencies to ensure build works
           npm run build:cli
           npm publish --access public
         env:

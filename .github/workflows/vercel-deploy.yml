@@ -1,0 +1,50 @@
+name: Vercel Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "public/"
+      - "package.json"
+      - "next.config.js"
+      - "postcss.config.js"
+      - "tsconfig.json"
+
+  pull_request:
+    paths:
+      - "src/**"
+      - "public/"
+      - "package.json"
+      - "next.config.js"
+      - "postcss.config.js"
+      - "tsconfig.json"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            vercel --prod --confirm --token $VERCEL_TOKEN
+          else
+            vercel --confirm --token $VERCEL_TOKEN --prebuilt
+          fi

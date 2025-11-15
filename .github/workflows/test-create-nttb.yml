@@ -45,12 +45,18 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install CLI locally
-        run: npm install .
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build CLI
+        run: npm run build:cli
+
+      - name: Link CLI globally
+        run: npm link
 
       - name: Create and verify global-app
         run: |
-          npx create-nttb global-app
+          create-nttb global-app
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
 

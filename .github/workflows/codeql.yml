@@ -8,6 +8,7 @@ on:
     paths:
       - "**/*.ts"
       - "**/*.tsx"
+      - ".github/workflows/*.yml"
   schedule:
     - cron: "34 4 * * 5"
 
@@ -25,8 +26,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # JavaScript/TypeScript codebase only; no Actions/QML/etc.
-          - language: javascript-typescript
+          - language: typescript
+            build-mode: none
+          - language: actions
             build-mode: none
 
     steps:

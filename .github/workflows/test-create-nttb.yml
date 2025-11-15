@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   cli-unit-test:
-    name: Run CLI Jest tests
+    name: Run CLI Unit tests
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
@@ -31,7 +31,7 @@ jobs:
         run: npm run test:cli
 
   cli-integration-test:
-    name: Test CLI installation and usage
+    name: Test CLI Integration test
     needs: cli-unit-test
     strategy:
       matrix:

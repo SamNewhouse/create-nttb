@@ -52,9 +52,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cli": "tsc -p tsconfig.cli.json",
     "start": "next start",
     "format": "prettier --write .",
-    "test": "jest --verbose"
+    "test": "jest --roots ./src",
+    "test:cli": "jest --roots ./bin"
   },
   "dependencies": {
     "axios": "1.13.2",
@@ -75,10 +77,10 @@
     "typescript": "5.9.3"
   },
   "bin": {
-    "create-nttb": "./bin/create.js"
+    "create-nttb": "./dist/bin/create.js"
   },
   "files": [
-    "bin",
+    "dist",
     "README.md",
     "LICENSE",
     "package.json"

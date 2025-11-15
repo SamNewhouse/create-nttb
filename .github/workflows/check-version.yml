@@ -21,8 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: "24.x"
 
       - name: Get package.json version from master branch
         id: master_version

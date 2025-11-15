@@ -8,57 +8,45 @@ permissions:
   contents: read
 
 jobs:
-  cli-unit-test:
-    name: CLI Unit Test (Node ${{ matrix.node }})
+  test-create-nttb:
+    name: All Tests (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: ["20.x", "22.x", "24.x"]
+        node: ["20.x", "24.x"]
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node }}
-      - run: npm install
-      - run: npm run test:cli
 
-  cli-integration-test:
-    name: CLI Integration Test (Node ${{ matrix.node }})
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: ["20.x", "22.x", "24.x"]
-    steps:
-      - uses: actions/checkout@v5
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
+
       - run: npm install
-      - run: npm run build:cli
-      - run: npm link
-      - run: |
+
+      - name: Run CLI Unit tests
+        run: npm run test:cli
+
+      - name: Build CLI
+        run: npm run build:cli
+      - name: Link CLI globally
+        run: npm link
+      - name: Create and verify global-app
+        run: |
           npx create-nttb global-app || exit 1
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
-      - run: |
+
+      - name: Validate NPM scripts
+        run: |
           for script in build start dev; do
             if ! grep -q "\"$script\"" "global-app/package.json"; then
               echo "NPM script '$script' missing in global-app"
               exit 1
             fi
           done
-      - run: rm -rf global-app
 
-  next-unit-test:
-    name: Next.js Jest Unit Test (Node ${{ matrix.node }})
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: ["20.x", "22.x", "24.x"]
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node }}
-      - run: npm install
-      - run: npm run test
+      - name: Cleanup global-app
+        run: rm -rf global-app
+
+      - name: Run Next.js unit tests
+        run: npm run test

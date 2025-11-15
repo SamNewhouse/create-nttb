@@ -8,74 +8,88 @@ permissions:
   contents: read
 
 jobs:
-  unit-test:
-    name: Run Jest unit tests
+  cli-unit-test:
+    name: Run CLI Unit tests
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-          cache: "npm"
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run Jest tests
-        run: npm run test
+      - name: Run CLI unit tests
+        run: npm run test:cli
 
-  cli-test:
-    name: Test CLI installation and usage
+  cli-integration-test:
+    name: Test CLI Integration test
+    needs: cli-unit-test
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install CLI globally
-        run: npm install -g .
+      - name: Install dependencies
+        run: npm install
 
-      - name: Create app using global CLI
-        run: create-nttb global-app
+      - name: Build CLI
+        run: npm run build:cli
 
-      - name: Verify global-app creation
+      - name: Link CLI globally
+        run: npm link
+
+      - name: Create and verify project
         run: |
+          npx create-nttb global-app || exit 1
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
 
-      - name: Create app using *local* CLI
-        run: npx --no-install create-nttb local-app
-
-      - name: Verify local-app creation
+      - name: Validate NPM scripts
         run: |
-          test -d local-app || { echo "local-app missing"; exit 1; }
-          test -f local-app/package.json || { echo "package.json missing"; exit 1; }
-
-      - name: Validate NPM scripts (for both apps)
-        run: |
-          for app in global-app local-app; do
-            for script in build start dev; do
-              if ! grep -q "\"$script\"" "$app/package.json"; then
-                echo "NPM script '$script' missing in $app"
-                exit 1
-              fi
-            done
+          for script in build start dev; do
+            if ! grep -q "\"$script\"" "global-app/package.json"; then
+              echo "NPM script '$script' missing in global-app"
+              exit 1
+            fi
           done
 
-      - name: Cleanup
-        run: rm -rf global-app local-app
+      - name: Cleanup project
+        run: rm -rf global-app
+
+  next-unit-test:
+    name: Run Next.js Jest tests
+    needs: cli-integration-test
+    strategy:
+      matrix:
+        node: ["20.x", "22.x", "24.x"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Next.js unit tests
+        run: npm run test

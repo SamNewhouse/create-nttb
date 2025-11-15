@@ -27,8 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (only if needed)
-        run: npm run build
+      - name: Test CLI
+        run: npm run test:cli
+
+      - name: Test build
+        run: npm run build:cli
 
   create-release-and-publish:
     runs-on: ubuntu-latest
@@ -63,6 +66,7 @@ jobs:
       - name: Install dependencies and publish package to NPM
         run: |
           npm ci --only=production
+          npm run build:cli
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

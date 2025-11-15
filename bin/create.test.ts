@@ -1,23 +1,23 @@
-const fs = require("fs");
-const path = require("path");
-const os = require("os");
+import fs from "fs";
+import path from "path";
+import os from "os";
 
-jest.mock("./create.js", () => {
-  const actual = jest.requireActual("./create.js");
+jest.mock("./create", () => {
+  const actual = jest.requireActual<typeof import("./create")>("./create");
   return {
     ...actual,
     main: jest.fn(),
   };
 });
 
-const {
+import {
   checkNodeVersion,
   checkGitInstalled,
   createProjectDirectory,
   runCommand,
   updatePackageJson,
   cleanUp,
-} = require("./create.js");
+} from "./create";
 
 jest.mock("child_process", () => ({
   execSync: jest.fn(),
@@ -32,20 +32,20 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  console.log.mockRestore();
+  (console.log as jest.Mock).mockRestore();
 });
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "create-nttb-"));
 }
 
-function readPkg(dir) {
+function readPkg(dir: string): Record<string, any> {
   return JSON.parse(fs.readFileSync(path.join(dir, "package.json"), "utf8"));
 }
 
 describe("create-nttb helpers", () => {
-  let tempDir;
-  let projectDir;
+  let tempDir: string;
+  let projectDir: string;
   const name = "jest-app";
 
   beforeEach(() => {
@@ -107,17 +107,17 @@ describe("create-nttb helpers", () => {
     afterEach(() => child.spawnSync.mockReset());
 
     test("throws on spawn error", () => {
-      child.spawnSync.mockReturnValue({ error: new Error("bad") });
+      child.spawnSync.mockReturnValue({ error: new Error("bad") } as any);
       expect(() => runCommand("bad")).toThrow(/bad/);
     });
 
     test("throws on nonzero exit", () => {
-      child.spawnSync.mockReturnValue({ status: 2 });
+      child.spawnSync.mockReturnValue({ status: 2 } as any);
       expect(() => runCommand("fail")).toThrow(/failed/);
     });
 
     test("passes on success", () => {
-      child.spawnSync.mockReturnValue({ status: 0 });
+      child.spawnSync.mockReturnValue({ status: 0 } as any);
       expect(() => runCommand("ok")).not.toThrow();
     });
   });
@@ -146,9 +146,16 @@ describe("create-nttb helpers", () => {
       const updated = readPkg(projectDir);
 
       expect(updated.name).toBe(name);
-      expect(updated.version).toBe("1.0.0");
+      expect(updated.version).toBe("1.0.1");
       expect(updated.description).toBe(`${name} app description`);
       expect(updated.keywords).toHaveLength(7);
+      expect(updated.scripts).toEqual({
+        dev: "next dev",
+        build: "next build",
+        start: "next start",
+        format: "prettier --write .",
+        test: "jest",
+      });
 
       ["author", "bin", "files", "homepage", "repository", "bugs", "funding"].forEach((k) =>
         expect(updated[k]).toBeUndefined(),
@@ -162,10 +169,15 @@ describe("create-nttb helpers", () => {
 
       [".git", ".github", "bin"].forEach((d) => fs.mkdirSync(path.join(projectDir, d)));
       fs.writeFileSync(path.join(projectDir, "renovate.json"), "{}");
+      fs.writeFileSync(path.join(projectDir, "tsconfig.cli.json"), "{}");
+
+      [".git", ".github", "bin", "renovate.json", "tsconfig.cli.json"].forEach((d) =>
+        expect(fs.existsSync(path.join(projectDir, d))).toBe(true),
+      );
 
       cleanUp(projectDir);
 
-      [".git", ".github", "bin", "renovate.json"].forEach((d) =>
+      [".git", ".github", "bin", "renovate.json", "tsconfig.cli.json"].forEach((d) =>
         expect(fs.existsSync(path.join(projectDir, d))).toBe(false),
       );
     });

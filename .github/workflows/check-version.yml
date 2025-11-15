@@ -23,12 +23,12 @@ jobs:
         with:
           node-version: "24.x"
 
-      - name: Get package.json version from master branch
-        id: master_version
+      - name: Get package.json version from main branch
+        id: main_version
         run: |
-          git fetch origin master
-          master_version=$(jq -r .version <(git show origin/master:package.json))
-          echo "master_version=$master_version" >> $GITHUB_ENV
+          git fetch origin main
+          main_version=$(jq -r .version <(git show origin/main:package.json))
+          echo "main_version=$main_version" >> $GITHUB_ENV
 
       - name: Get package.json version from current branch
         id: current_version
@@ -39,7 +39,7 @@ jobs:
       - name: Compare versions and update if necessary
         id: compare_versions
         run: |
-          if [ "$branch_version" = "$master_version" ]; then
+          if [ "$branch_version" = "$main_version" ]; then
             IFS='.' read -r major minor patch <<< "$branch_version"
             patch=$((patch + 1))
             new_version="$major.$minor.$patch"

@@ -3,16 +3,43 @@ name: Test create-nttb
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - ".github/workflows/**"
-      - "renovate.json"
 
 permissions:
   contents: read
 
 jobs:
+  check-changes:
+    name: Check for Relevant Changes
+    runs-on: ubuntu-latest
+    outputs:
+      run_tests: ${{ steps.check.outputs.run_tests }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Determine if CLI/Next.js files changed
+        id: check
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          # Check CLI files
+          if git diff --name-only origin/${{ github.base_ref }} HEAD \
+             | grep -Eq '^(bin/|package.json|tsconfig.cli.json)'; then
+            echo "CLI changes detected."
+            echo "run_tests=true" >> $GITHUB_OUTPUT
+          # Check Next.js files
+          elif git diff --name-only origin/${{ github.base_ref }} HEAD \
+             | grep -Eq '^(src/|public/|package.json|next.config.js|postcss.config.js|tsconfig.json)'; then
+            echo "Next.js changes detected."
+            echo "run_tests=true" >> $GITHUB_OUTPUT
+          else
+            echo "No relevant changes detected."
+            echo "run_tests=false" >> $GITHUB_OUTPUT
+          fi
+
   cli-unit-test:
     name: Run CLI Unit tests
+    needs: check-changes
+    if: needs.check-changes.outputs.run_tests == 'true'
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
@@ -20,21 +47,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-
       - name: Install dependencies
         run: npm install
-
       - name: Run CLI unit tests
         run: npm run test:cli
 
   cli-integration-test:
-    name: Test CLI Integration test
-    needs: cli-unit-test
+    name: Test CLI Integration
+    needs: [check-changes, cli-unit-test]
+    if: needs.check-changes.outputs.run_tests == 'true'
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
@@ -42,27 +67,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-
       - name: Install dependencies
         run: npm install
-
       - name: Build CLI
         run: npm run build:cli
-
       - name: Link CLI globally
         run: npm link
-
       - name: Create and verify project
         run: |
           npx create-nttb global-app || exit 1
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
-
       - name: Validate NPM scripts
         run: |
           for script in build start dev; do
@@ -71,13 +90,13 @@ jobs:
               exit 1
             fi
           done
-
       - name: Cleanup project
         run: rm -rf global-app
 
   next-unit-test:
     name: Run Next.js Jest tests
-    needs: cli-integration-test
+    needs: [check-changes, cli-integration-test]
+    if: needs.check-changes.outputs.run_tests == 'true'
     strategy:
       matrix:
         node: ["20.x", "22.x", "24.x"]
@@ -85,14 +104,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-
       - name: Install dependencies
         run: npm install
-
       - name: Run Next.js unit tests
         run: npm run test

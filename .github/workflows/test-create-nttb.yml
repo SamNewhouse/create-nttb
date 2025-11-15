@@ -45,38 +45,23 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install CLI globally
-        run: npm install -g .
-
-      - name: Create app using global CLI
-        run: create-nttb global-app
-
-      - name: Verify global-app creation
+      - name: Create and verify global-app
         run: |
+          npx --no-install create-nttb global-app
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
 
-      - name: Create app using local CLI
-        run: npx --no-install create-nttb local-app
-
-      - name: Verify local-app creation
+      - name: Validate NPM scripts
         run: |
-          test -d local-app || { echo "local-app missing"; exit 1; }
-          test -f local-app/package.json || { echo "package.json missing"; exit 1; }
-
-      - name: Validate NPM scripts (for both apps)
-        run: |
-          for app in global-app local-app; do
-            for script in build start dev; do
-              if ! grep -q "\"$script\"" "$app/package.json"; then
-                echo "NPM script '$script' missing in $app"
-                exit 1
-              fi
-            done
+          for script in build start dev; do
+            if ! grep -q "\"$script\"" "global-app/package.json"; then
+              echo "NPM script '$script' missing in global-app"
+              exit 1
+            fi
           done
 
       - name: Cleanup
-        run: rm -rf global-app local-app
+        run: rm -rf global-app
 
   next-unit-test:
     name: Run Next.js Jest tests

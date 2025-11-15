@@ -3,6 +3,9 @@ name: Test create-nttb
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - ".github/workflows/**"
+      - "renovate.json"
 
 permissions:
   contents: read

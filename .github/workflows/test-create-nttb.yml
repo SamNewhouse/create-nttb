@@ -15,7 +15,7 @@ jobs:
       run_tests: ${{ steps.check.outputs.run_tests }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Determine if CLI/Next.js files changed
         id: check

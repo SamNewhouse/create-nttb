@@ -51,12 +51,9 @@ jobs:
       - name: Build CLI
         run: npm run build:cli
 
-      - name: Link CLI globally
-        run: npm link
-
-      - name: Create and verify global-app
+      - name: Create and verify project
         run: |
-          npx create-nttb global-app
+          npx --no-install ./dist/bin/create.js global-app
           test -d global-app || { echo "global-app missing"; exit 1; }
           test -f global-app/package.json || { echo "package.json missing"; exit 1; }
 

@@ -1,4 +1,6 @@
-# Next.js TypeScript Tailwind Boilerplate by Sam Newhouse
+# creat-nttb
+
+## Next.js TypeScript Tailwind Boilerplate by Sam Newhouse
 
 This boilerplate is structured to organise code clearly and enable scalable development using Atomic Design principles and Next.js 16 with TypeScript and Tailwind CSS. It provides a robust architectural foundation for scalable React applications, blending the latest tools and community conventions into a ready-to-use starter kit.
 

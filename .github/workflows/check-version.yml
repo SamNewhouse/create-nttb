@@ -2,7 +2,7 @@ name: Check version
 
 on:
   pull_request:
-    types: [synchronize, opened, reopened]
+    types: [opened, reopened, synchronize]
     paths-ignore:
       - ".github/workflows/**"
       - "renovate.json"
@@ -15,64 +15,61 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "24.x"
 
-      - name: Get package.json version from main branch
-        id: main_version
-        run: |
-          git fetch origin main
-          main_version=$(jq -r .version <(git show origin/main:package.json))
-          echo "main_version=$main_version" >> $GITHUB_ENV
+      - name: Fetch main branch
+        run: git fetch origin main:main
 
-      - name: Get package.json version from current branch
-        id: current_version
+      - name: Get versions
+        id: get_versions
         run: |
-          branch_version=$(jq -r .version package.json)
-          echo "branch_version=$branch_version" >> $GITHUB_ENV
+          MAIN_VERSION=$(jq -r .version <(git show main:package.json))
+          BRANCH_VERSION=$(jq -r .version package.json)
+          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
+          echo "BRANCH_VERSION=$BRANCH_VERSION" >> $GITHUB_ENV
+          echo "Main version: $MAIN_VERSION"
+          echo "Branch version: $BRANCH_VERSION"
 
-      - name: Compare versions and update if necessary
-        id: compare_versions
+      - name: Decide if patch bump needed
+        id: decide_bump
         run: |
-          if [ "$branch_version" = "$main_version" ]; then
-            IFS='.' read -r major minor patch <<< "$branch_version"
-            patch=$((patch + 1))
-            new_version="$major.$minor.$patch"
-            echo "New version: $new_version"
-            jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
-            echo "Version updated to $new_version"
+          IFS='.' read -r maj min pat <<< "$MAIN_VERSION"
+          NEXT_PATCH=$((pat + 1))
+          NEXT_VERSION="${maj}.${min}.${NEXT_PATCH}"
+          if [ "$BRANCH_VERSION" = "$MAIN_VERSION" ]; then
             echo "version_updated=true" >> $GITHUB_ENV
-            echo "new_version=$new_version" >> $GITHUB_ENV
+            echo "new_version=$NEXT_VERSION" >> $GITHUB_ENV
+            echo "Patch bump needed: $NEXT_VERSION"
           else
-            echo "Versions are different. No update needed."
             echo "version_updated=false" >> $GITHUB_ENV
+            echo "Patch bump not needed"
           fi
 
-      - name: Update version in package-lock
-        if: env.version_updated == 'true'
-        run: npm install
-
-      - name: Commit version bump
+      - name: Bump patch version
         if: env.version_updated == 'true'
         run: |
           git config --global user.name "SamNewhouse"
           git config --global user.email "hello@samnewhouse.co.uk"
+
+          NEW_VERSION=${{ env.new_version }}
+          npm version "$NEW_VERSION" --no-git-tag-version
+
           git add package.json package-lock.json
-          git commit -m "Changed version to ${{ env.new_version }}"
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/SamNewhouse/create-nttb.git
-          git pull --rebase origin ${{ github.head_ref }}
-          git push origin HEAD:${{ github.head_ref }}
+          git commit -m "v$NEW_VERSION"
+          git push origin HEAD:${GITHUB_HEAD_REF}
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
 
       - name: Success
-        run: echo "Version check and update workflow completed successfully."
+        run: echo "Version check completed."
 
       - name: Failure
         if: failure()
-        run: echo "Version check and update workflow failed."
+        run: echo "Version check failed."

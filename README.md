@@ -107,6 +107,15 @@ src/                    # Source code
 ```
 ---
 
+## SEO: Automatic sitemap and robots.txt
+
+Every project scaffolded with `create-nttb` includes dynamic generation of:
+
+- `/sitemap.xml` – built from your `src/app` folder structure with sensible defaults for `lastmod`, `priority`, and `changefreq`.
+- `/robots.txt` – served from a route handler that always points to the current `/sitemap.xml` URL and disallows `/api/`.
+
+These files are generated at request time in production with incremental revalidation, so they stay up to date automatically as you add new top-level routes under `src/app`.
+
 ## Licence
 
 This project is licensed under the ISC Licence - see the [LICENSE](./LICENSE) file for details.

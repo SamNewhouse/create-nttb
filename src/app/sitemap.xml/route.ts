@@ -16,6 +16,20 @@ import {
 export const revalidate = 60;
 
 /**
+ * Minimal XML escaping for element text content.
+ * Escapes characters that are significant in XML:
+ *  - &  <  >  "  '
+ */
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/**
  * Route handler for /sitemap.xml.
  *
  * This generates a basic XML sitemap that:
@@ -49,7 +63,11 @@ export async function GET() {
     urls
       .map(
         ({ loc, priority, lastmod, changefreq }) =>
-          `<url><loc>${loc}</loc><lastmod>${lastmod}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`,
+          `<url><loc>${escapeXml(loc)}</loc><lastmod>${escapeXml(
+            lastmod,
+          )}</lastmod><changefreq>${escapeXml(
+            changefreq,
+          )}</changefreq><priority>${escapeXml(String(priority))}</priority></url>`,
       )
       .join("") +
     `</urlset>`;

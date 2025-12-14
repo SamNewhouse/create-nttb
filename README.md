@@ -1,4 +1,4 @@
-# creat-nttb
+# create-nttb
 
 ## Next.js TypeScript Tailwind Boilerplate by Sam Newhouse
 

@@ -61,7 +61,7 @@ export function updatePackageJson(projectPath: string, projectName: string): voi
   const updated = {
     ...pkg,
     name: projectName,
-    version: "1.0.1",
+    version: "1.0.0",
     description: `${projectName} app description`,
     keywords: [
       "create-nttb",

@@ -146,7 +146,7 @@ describe("create-nttb helpers", () => {
       const updated = readPkg(projectDir);
 
       expect(updated.name).toBe(name);
-      expect(updated.version).toBe("1.0.1");
+      expect(updated.version).toBe("1.0.0");
       expect(updated.description).toBe(`${name} app description`);
       expect(updated.keywords).toHaveLength(7);
       expect(updated.scripts).toEqual({

@@ -2,8 +2,8 @@
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
-    "module": "preserve",
-    "moduleResolution": "bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "target": "esnext",

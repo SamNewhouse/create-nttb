@@ -5,10 +5,11 @@
     "strict": true,
     "esModuleInterop": true,
     "module": "commonjs",
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "resolveJsonModule": true,
     "target": "ES2020",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "ignoreDeprecations": "5.0"
   },
   "include": ["bin/create.ts"],
   "exclude": ["node_modules"]

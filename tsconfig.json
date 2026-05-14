@@ -2,7 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
-    "module": "esnext",
+    "module": "preserve",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -18,9 +18,8 @@
   "include": [
     "next-env.d.ts",
     "src/**/*",
-    "bin/**/*",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "dist", ".next"]
+  "exclude": ["node_modules", "dist", ".next", "bin"]
 }

@@ -50,14 +50,6 @@ export function checkNpmVersion(minMajor: number = 10): void {
   if (Number(major) < minMajor) throw new Error(`npm v${minMajor}+ required (found v${version})`);
 }
 
-export function checkGitInstalled(): void {
-  try {
-    execSync("git --version", { stdio: "ignore" });
-  } catch {
-    throw new Error("Git is not installed. See https://git-scm.com/");
-  }
-}
-
 export function createProjectDirectory(projectPath: string): void {
   if (fs.existsSync(projectPath)) {
     if (fs.readdirSync(projectPath).length === 0) return;
@@ -77,6 +69,10 @@ export function runCommand(
   if (result.status !== 0) throw new Error(`${command} failed`);
 }
 
+export function copyTemplate(templateDir: string, projectPath: string): void {
+  fs.cpSync(templateDir, projectPath, { recursive: true });
+}
+
 export function updatePackageJson(projectPath: string, projectName: string): void {
   const file = path.join(projectPath, "package.json");
   const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -84,7 +80,8 @@ export function updatePackageJson(projectPath: string, projectName: string): voi
     ...pkg,
     name: projectName,
     version: "1.0.0",
-    description: `${projectName} app description`,
+    description: `${projectName} app`,
+    private: true,
     keywords: [
       "create-nttb",
       "nextjs",
@@ -94,26 +91,8 @@ export function updatePackageJson(projectPath: string, projectName: string): voi
       "boilerplate",
       projectName,
     ],
-    scripts: {
-      dev: "next dev",
-      build: "next build",
-      start: "next start",
-      format: "prettier --write .",
-      test: "jest",
-      "type-check": "tsc --noEmit",
-    },
   };
-  for (const key of ["author", "bin", "files", "homepage", "repository", "bugs", "funding"])
-    delete updated[key];
   fs.writeFileSync(file, JSON.stringify(updated, null, 2));
-}
-
-export function cleanUp(projectPath: string): void {
-  const targets = [".git", ".github", "bin", "renovate.json", "tsconfig.cli.json"];
-  for (const item of targets) {
-    const p = path.join(projectPath, item);
-    if (fs.existsSync(p)) fs.rmSync(p, { recursive: true, force: true });
-  }
 }
 
 export async function main(): Promise<void> {
@@ -124,7 +103,7 @@ export async function main(): Promise<void> {
   }
 
   const projectPath = path.join(process.cwd(), name);
-  const repo = "https://github.com/SamNewhouse/create-nttb";
+  const templateDir = path.join(__dirname, "..", "template");
 
   try {
     step("Validating project name");
@@ -139,29 +118,21 @@ export async function main(): Promise<void> {
     checkNpmVersion();
     doneStep();
 
-    step("Checking Git");
-    checkGitInstalled();
-    doneStep();
-
     step("Creating project");
     createProjectDirectory(projectPath);
     doneStep();
 
-    step("Cloning template");
-    runCommand("git", ["clone", "--depth", "1", repo, projectPath], { timeout: 60000 });
+    step("Copying template");
+    copyTemplate(templateDir, projectPath);
+    doneStep();
+
+    step("Updating package.json");
+    updatePackageJson(projectPath, name);
     doneStep();
 
     step("Installing packages");
-    runCommand("npm", ["install"], { cwd: projectPath, stdio: "ignore" });
+    runCommand("npm", ["install"], { cwd: projectPath });
     doneStep();
-
-    step("Cleaning up");
-    cleanUp(projectPath);
-    doneStep();
-
-    if (fs.existsSync(path.join(projectPath, "package.json"))) {
-      updatePackageJson(projectPath, name);
-    }
 
     clearLine();
     console.log(`\nInstallation complete\n\n Next steps:\n\n cd ${name}\n npm run dev\n`);
@@ -178,11 +149,10 @@ export default {
   validateProjectName,
   checkNodeVersion,
   checkNpmVersion,
-  checkGitInstalled,
   createProjectDirectory,
   runCommand,
+  copyTemplate,
   updatePackageJson,
-  cleanUp,
   main,
 };
 

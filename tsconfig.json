@@ -1,21 +1,17 @@
 {
   "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "bin",
     "strict": true,
     "esModuleInterop": true,
-    "module": "preserve",
-    "moduleResolution": "bundler",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "target": "esnext",
+    "target": "ESNext",
     "skipLibCheck": true,
-    "incremental": true,
-    "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "noEmit": true,
-    "allowJs": false,
-    "plugins": [{ "name": "next" }],
     "types": ["node", "jest"]
   },
-  "include": ["next-env.d.ts", "src/**/*", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
-  "exclude": ["node_modules", "dist", ".next", "bin"]
+  "include": ["bin/**/*.ts"],
+  "exclude": ["node_modules", "dist", "template"]
 }

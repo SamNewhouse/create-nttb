@@ -1,0 +1,65 @@
+name: CI - CLI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "bin/**"
+      - "package.json"
+      - ".github/workflows/ci-cli.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: CLI (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ["20.x", "24.x"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Unit tests
+        run: npm run test:cli
+
+      - name: Build CLI
+        run: npm run build:cli
+
+      - name: Assert CLI artifact exists
+        run: test -f dist/create.js
+
+      - name: Link CLI globally
+        run: npm link
+
+      - name: Run CLI and verify output
+        run: |
+          create-nttb test-app || exit 1
+          test -d test-app || { echo "test-app directory missing"; exit 1; }
+          test -f test-app/package.json || { echo "package.json missing"; exit 1; }
+
+      - name: Validate NPM scripts
+        run: |
+          for script in build start dev; do
+            if ! grep -q "\"$script\"" "test-app/package.json"; then
+              echo "NPM script '$script' missing"
+              exit 1
+            fi
+          done
+
+      - name: Cleanup
+        run: rm -rf test-app

@@ -1,102 +1,100 @@
-import type { NextApiResponse } from "next";
-import { sendOk, sendMethodNotAllowed, sendBadRequest, sendError, sendNotFound } from "./response";
+import { NextResponse } from "next/server";
+import {
+  sendOk,
+  sendCreated,
+  sendNoContent,
+  sendBadRequest,
+  sendNotFound,
+  sendMethodNotAllowed,
+  sendError,
+} from "./response";
 
-function createResMock() {
-  let statusCode: number | undefined;
-  let jsonData: any;
-  let headers: Record<string, any> = {};
-
-  const res = {
-    setHeader: jest.fn((key: string, value: any) => {
-      headers[key] = value;
-    }),
-    status: jest.fn(function (code: number) {
-      statusCode = code;
-      return this;
-    }),
-    json: jest.fn(function (data: any) {
-      jsonData = data;
-      return this;
-    }),
-  } as unknown as NextApiResponse;
-
-  return {
-    res,
-    get statusCode() {
-      return statusCode;
-    },
-    get jsonData() {
-      return jsonData;
-    },
-    headers,
-  };
+async function json(res: NextResponse) {
+  return res.json();
 }
 
-describe("response helpers", () => {
-  test("sendOk sends 200 and JSON data", () => {
-    const { res, statusCode, jsonData } = createResMock();
-    sendOk(res, { ok: true });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ ok: true });
+describe("sendOk()", () => {
+  it("returns status 200 with data", async () => {
+    const res = sendOk({ id: 1 });
+    expect(res.status).toBe(200);
+    expect(await json(res)).toEqual({ id: 1 });
+  });
+});
+
+describe("sendCreated()", () => {
+  it("returns status 201 with data", async () => {
+    const res = sendCreated({ id: 2 });
+    expect(res.status).toBe(201);
+    expect(await json(res)).toEqual({ id: 2 });
+  });
+});
+
+describe("sendNoContent()", () => {
+  it("returns status 204 with no body", async () => {
+    const res = sendNoContent();
+    expect(res.status).toBe(204);
+    expect(res.body).toBeNull();
+  });
+});
+
+describe("sendBadRequest()", () => {
+  it("returns status 400 with default message", async () => {
+    const res = sendBadRequest();
+    expect(res.status).toBe(400);
+    expect(await json(res)).toEqual({ error: "Bad Request" });
   });
 
-  test("sendMethodNotAllowed sends 405 and sets Allow header (default)", () => {
-    const { res, statusCode, jsonData, headers } = createResMock();
-    sendMethodNotAllowed(res);
-    expect(res.setHeader).toHaveBeenCalledWith("Allow", ["GET"]);
-    expect(res.status).toHaveBeenCalledWith(405);
-    expect(res.json).toHaveBeenCalledWith({ error: "Method GET only" });
-    expect(headers.Allow).toEqual(["GET"]);
+  it("returns status 400 with custom message", async () => {
+    const res = sendBadRequest("Invalid email");
+    expect(res.status).toBe(400);
+    expect(await json(res)).toEqual({ error: "Invalid email" });
+  });
+});
+
+describe("sendNotFound()", () => {
+  it("returns status 404 with default message", async () => {
+    const res = sendNotFound();
+    expect(res.status).toBe(404);
+    expect(await json(res)).toEqual({ error: "Not Found" });
   });
 
-  test("sendMethodNotAllowed allows custom methods", () => {
-    const { res, headers } = createResMock();
-    sendMethodNotAllowed(res, ["DELETE", "POST"]);
-    expect(res.setHeader).toHaveBeenCalledWith("Allow", ["DELETE", "POST"]);
-    expect(res.status).toHaveBeenCalledWith(405);
-    expect(res.json).toHaveBeenCalledWith({ error: "Method DELETE, POST only" });
-    expect(headers.Allow).toEqual(["DELETE", "POST"]);
+  it("returns status 404 with custom message", async () => {
+    const res = sendNotFound("User not found");
+    expect(res.status).toBe(404);
+    expect(await json(res)).toEqual({ error: "User not found" });
+  });
+});
+
+describe("sendMethodNotAllowed()", () => {
+  it("returns status 405 with default allowed methods", async () => {
+    const res = sendMethodNotAllowed();
+    expect(res.status).toBe(405);
+    expect(res.headers.get("Allow")).toBe("GET");
+    expect(await json(res)).toEqual({
+      error: "Method not allowed. Allowed: GET",
+    });
   });
 
-  test("sendBadRequest sends 400 and default error", () => {
-    const { res } = createResMock();
-    sendBadRequest(res);
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: "Bad Request" });
+  it("returns status 405 with custom allowed methods", async () => {
+    const res = sendMethodNotAllowed(["GET", "POST"]);
+    expect(res.status).toBe(405);
+    expect(res.headers.get("Allow")).toBe("GET, POST");
+    expect(await json(res)).toEqual({
+      error: "Method not allowed. Allowed: GET, POST",
+    });
+  });
+});
+
+describe("sendError()", () => {
+  it("returns status 500 with default message", async () => {
+    const res = sendError();
+    expect(res.status).toBe(500);
+    expect(await json(res)).toEqual({ error: "Internal Server Error" });
   });
 
-  test("sendBadRequest sends custom error", () => {
-    const { res } = createResMock();
-    sendBadRequest(res, "custom bad");
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ error: "custom bad" });
-  });
-
-  test("sendError sends custom error and status", () => {
-    const { res } = createResMock();
-    sendError(res, 409, "conflict");
-    expect(res.status).toHaveBeenCalledWith(409);
-    expect(res.json).toHaveBeenCalledWith({ error: "conflict" });
-  });
-
-  test("sendError sends default error for no args", () => {
-    const { res } = createResMock();
-    sendError(res);
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ error: "Internal Server Error" });
-  });
-
-  test("sendNotFound sends 404 and default error", () => {
-    const { res } = createResMock();
-    sendNotFound(res);
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: "Not Found" });
-  });
-
-  test("sendNotFound sends 404 and custom error", () => {
-    const { res } = createResMock();
-    sendNotFound(res, "nope");
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: "nope" });
+  it("returns status 503 with custom message", async () => {
+    const res = sendError(503, "Service unavailable");
+    expect(res.status).toBe(503);
+    expect(await json(res)).toEqual({ error: "Service unavailable" });
   });
 });

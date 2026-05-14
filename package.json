@@ -1,6 +1,6 @@
 {
   "name": "create-nttb",
-  "version": "4.5.1",
+  "version": "4.6.0",
   "description": "An opinionated Next.js, TypeScript, and Tailwind boilerplate using Atomic Design Methodology for presentation components.",
   "license": "ISC",
   "readme": "README.md",
@@ -14,11 +14,11 @@
     "build:cli": "npx tsc -p tsconfig.cli.json",
     "start": "next start",
     "format": "prettier --write .",
+    "type-check": "npx tsc --noEmit",
     "test": "jest --roots ./src",
     "test:cli": "jest --roots ./bin"
   },
   "dependencies": {
-    "axios": "1.16.1",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"

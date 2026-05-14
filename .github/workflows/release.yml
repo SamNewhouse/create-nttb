@@ -76,7 +76,7 @@ jobs:
         working-directory: /tmp/my-app
 
       - name: Type-check
-        run: npx tsc --noEmit
+        run: npm run type-check
         working-directory: /tmp/my-app
 
       - name: Unit tests

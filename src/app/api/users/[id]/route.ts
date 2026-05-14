@@ -8,10 +8,7 @@ import { User } from "../../../../types";
  * Example of a dynamic route using a typed param and sendNotFound.
  * Replace with your own data lookup.
  */
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 

@@ -100,6 +100,7 @@ export function updatePackageJson(projectPath: string, projectName: string): voi
       start: "next start",
       format: "prettier --write .",
       test: "jest",
+      "type-check": "tsc --noEmit",
     },
   };
   for (const key of ["author", "bin", "files", "homepage", "repository", "bugs", "funding"])

@@ -100,4 +100,9 @@ jobs:
         if: ${{ secrets.NPM_TOKEN != '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm ping
+        run: |
+          if [ -n "$NPM_TOKEN" ]; then
+            npm ping
+          else
+            echo "NPM_TOKEN not set, skipping ping"
+          fi

@@ -1,10 +1,8 @@
-name: Check version
+name: CI — Check Version
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
-    branches:
-      - main
+    branches: [main]
     paths-ignore:
       - ".github/**"
       - "renovate.json"
@@ -14,15 +12,17 @@ permissions:
   contents: write
 
 jobs:
-  check_version:
+  check-version:
+    name: Check Version
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "24.x"
@@ -69,10 +69,3 @@ jobs:
           git push origin HEAD:${GITHUB_HEAD_REF}
         env:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
-
-      - name: Success
-        run: echo "Version check completed."
-
-      - name: Failure
-        if: failure()
-        run: echo "Version check failed."

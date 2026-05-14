@@ -1,10 +1,10 @@
-name: "CodeQL Advanced"
+name: CI — CodeQL
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    branches: ["main"]
+    branches: [main]
     paths:
       - "**/*.ts"
       - "**/*.tsx"
@@ -12,15 +12,16 @@ on:
   schedule:
     - cron: "34 4 * * 5"
 
+permissions:
+  contents: read
+  security-events: write
+  packages: read
+  actions: read
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      packages: read
-      actions: read
-      contents: read
 
     strategy:
       fail-fast: false
@@ -40,13 +41,6 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-
-      - name: Run manual build steps
-        if: matrix.build-mode == 'manual'
-        shell: bash
-        run: |
-          echo 'Manual build-mode is not used for this language.'
-          exit 1
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

@@ -1,6 +1,13 @@
 module.exports = {
   testEnvironment: "node",
   verbose: true,
-  testMatch: ["**/*.test.js", "**/*.test.ts"],
   preset: "ts-jest",
+  roots: ["<rootDir>/bin"],
+  testMatch: ["**/*.test.ts"],
+  transformIgnorePatterns: ["/node_modules/"],
+  globals: {
+    "ts-jest": {
+      tsconfig: "tsconfig.cli.json",
+    },
+  },
 };

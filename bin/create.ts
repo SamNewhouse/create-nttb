@@ -40,14 +40,14 @@ export function checkNodeVersion(minMajor: number = 20): void {
 }
 
 export function checkNpmVersion(minMajor: number = 10): void {
+  let version: string;
   try {
-    const version = execSync("npm --version", { encoding: "utf8" }).trim();
-    const [major] = version.split(".");
-    if (Number(major) < minMajor)
-      throw new Error(`npm v${minMajor}+ required (found v${version})`);
+    version = execSync("npm --version", { encoding: "utf8" }).trim();
   } catch {
     throw new Error("npm is not installed or not accessible.");
   }
+  const [major] = version.split(".");
+  if (Number(major) < minMajor) throw new Error(`npm v${minMajor}+ required (found v${version})`);
 }
 
 export function checkGitInstalled(): void {

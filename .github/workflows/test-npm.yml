@@ -4,16 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
-      - '.npmrc'
-      - '.gitignore'
-      - 'README.md'
-      - 'LICENSE'
-      - 'tsconfig.cli.json'
-      - 'bin/**'
-      - '.github/workflows/test-npm.yml'
 
 permissions:
   contents: read

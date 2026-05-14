@@ -99,5 +99,5 @@ jobs:
       - name: Token auth check
         if: ${{ secrets.NPM_TOKEN != '' }}
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm ping

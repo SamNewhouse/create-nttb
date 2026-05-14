@@ -1,14 +1,16 @@
 /**
- * types.ts
- *
- * Central location for shared TypeScript types used across your project.
- *
- * - Define standard API response shapes and data contracts here.
- * - Keeps your codebase consistent and reduces repetition.
- * - Import this type wherever you build API routes, services, or interfaces that return/respond with these fields.
+ * Represents a user returned from the API.
  */
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
 
-export type Data = {
-  message?: string;
-  error?: string;
-};
+/**
+ * Request body for creating a new user.
+ */
+export interface CreateUserBody {
+  name: string;
+  email: string;
+}

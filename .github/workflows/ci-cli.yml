@@ -69,7 +69,7 @@ jobs:
   npm-publish-dry-run:
     name: NPM Publish Dry Run
     runs-on: ubuntu-latest
-    # Only needs to run on Node 24 — no matrix needed
+
     steps:
       - uses: actions/checkout@v6
 

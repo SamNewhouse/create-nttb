@@ -3,9 +3,12 @@ name: Check version
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+    branches:
+      - main
     paths-ignore:
-      - ".github/workflows/**"
+      - ".github/**"
       - "renovate.json"
+      - "LICENSE"
 
 permissions:
   contents: write

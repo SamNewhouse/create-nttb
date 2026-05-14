@@ -4,8 +4,9 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths-ignore:
-      - ".github/workflows/**"
+      - ".github/**"
       - "renovate.json"
+      - "LICENSE"
 
 permissions:
   contents: write

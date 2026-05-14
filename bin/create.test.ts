@@ -241,6 +241,7 @@ describe("create-nttb helpers", () => {
         start: "next start",
         format: "prettier --write .",
         test: "jest",
+        "type-check": "tsc --noEmit",
       });
 
       ["author", "bin", "files", "homepage", "repository", "bugs", "funding"].forEach((k) =>

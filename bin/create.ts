@@ -23,9 +23,31 @@ function doneStep(): void {
   clearLine();
 }
 
+export function validateProjectName(name: string): void {
+  if (!/^[a-z0-9]([a-z0-9-_]*[a-z0-9])?$/i.test(name)) {
+    throw new Error(
+      `Invalid project name "${name}". Use only letters, numbers, hyphens, and underscores.`,
+    );
+  }
+  if (name.length > 214) {
+    throw new Error("Project name must be 214 characters or fewer.");
+  }
+}
+
 export function checkNodeVersion(minMajor: number = 20): void {
   const [major] = process.version.replace("v", "").split(".");
   if (Number(major) < minMajor) throw new Error(`Node.js v${minMajor}+ required`);
+}
+
+export function checkNpmVersion(minMajor: number = 10): void {
+  try {
+    const version = execSync("npm --version", { encoding: "utf8" }).trim();
+    const [major] = version.split(".");
+    if (Number(major) < minMajor)
+      throw new Error(`npm v${minMajor}+ required (found v${version})`);
+  } catch {
+    throw new Error("npm is not installed or not accessible.");
+  }
 }
 
 export function checkGitInstalled(): void {
@@ -39,7 +61,7 @@ export function checkGitInstalled(): void {
 export function createProjectDirectory(projectPath: string): void {
   if (fs.existsSync(projectPath)) {
     if (fs.readdirSync(projectPath).length === 0) return;
-    throw new Error(`Directory "${projectPath}" exists and is not empty.`);
+    throw new Error(`Directory "${path.basename(projectPath)}" exists and is not empty.`);
   }
   fs.mkdirSync(projectPath, { recursive: true });
 }
@@ -99,36 +121,62 @@ export async function main(): Promise<void> {
     console.error("Please provide a project name.");
     process.exit(1);
   }
+
   const projectPath = path.join(process.cwd(), name);
   const repo = "https://github.com/SamNewhouse/create-nttb";
-  step("Checking Node version");
-  checkNodeVersion();
-  doneStep();
-  step("Checking Git");
-  checkGitInstalled();
-  doneStep();
-  step("Creating project");
-  createProjectDirectory(projectPath);
-  doneStep();
-  step("Cloning template");
-  runCommand("git", ["clone", "--depth", "1", repo, projectPath]);
-  doneStep();
-  process.chdir(projectPath);
-  step("Installing packages");
-  runCommand("npm", ["install", "--silent"]);
-  doneStep();
-  step("Cleaning up");
-  cleanUp(projectPath);
-  doneStep();
-  if (fs.existsSync(path.join(projectPath, "package.json"))) {
-    updatePackageJson(projectPath, name);
+
+  try {
+    step("Validating project name");
+    validateProjectName(name);
+    doneStep();
+
+    step("Checking Node version");
+    checkNodeVersion();
+    doneStep();
+
+    step("Checking npm version");
+    checkNpmVersion();
+    doneStep();
+
+    step("Checking Git");
+    checkGitInstalled();
+    doneStep();
+
+    step("Creating project");
+    createProjectDirectory(projectPath);
+    doneStep();
+
+    step("Cloning template");
+    runCommand("git", ["clone", "--depth", "1", repo, projectPath], { timeout: 60000 });
+    doneStep();
+
+    step("Installing packages");
+    runCommand("npm", ["install"], { cwd: projectPath, stdio: "ignore" });
+    doneStep();
+
+    step("Cleaning up");
+    cleanUp(projectPath);
+    doneStep();
+
+    if (fs.existsSync(path.join(projectPath, "package.json"))) {
+      updatePackageJson(projectPath, name);
+    }
+
+    clearLine();
+    console.log(`\nInstallation complete\n\n Next steps:\n\n cd ${name}\n npm run dev\n`);
+  } catch (err) {
+    clearLine();
+    if (fs.existsSync(projectPath)) {
+      fs.rmSync(projectPath, { recursive: true, force: true });
+    }
+    throw err;
   }
-  clearLine();
-  console.log(`\nInstallation complete\n\n Next steps:\n\n cd ${name}\n npm run dev\n`);
 }
 
 export default {
+  validateProjectName,
   checkNodeVersion,
+  checkNpmVersion,
   checkGitInstalled,
   createProjectDirectory,
   runCommand,

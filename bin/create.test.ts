@@ -11,7 +11,9 @@ jest.mock("./create", () => {
 });
 
 import {
+  validateProjectName,
   checkNodeVersion,
+  checkNpmVersion,
   checkGitInstalled,
   createProjectDirectory,
   runCommand,
@@ -57,6 +59,41 @@ describe("create-nttb helpers", () => {
     fs.rmSync(tempDir, { recursive: true, force: true });
   });
 
+  describe("validateProjectName", () => {
+    test("passes for valid names", () => {
+      expect(() => validateProjectName("my-app")).not.toThrow();
+      expect(() => validateProjectName("myapp")).not.toThrow();
+      expect(() => validateProjectName("my_app")).not.toThrow();
+      expect(() => validateProjectName("App123")).not.toThrow();
+    });
+
+    test("throws for name with spaces", () => {
+      expect(() => validateProjectName("my app")).toThrow(/Invalid project name/);
+    });
+
+    test("throws for name with special characters", () => {
+      expect(() => validateProjectName("my@app")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("../evil")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("./local")).toThrow(/Invalid project name/);
+    });
+
+    test("throws for name starting with hyphen", () => {
+      expect(() => validateProjectName("-myapp")).toThrow(/Invalid project name/);
+    });
+
+    test("throws for name ending with hyphen", () => {
+      expect(() => validateProjectName("myapp-")).toThrow(/Invalid project name/);
+    });
+
+    test("throws for name exceeding 214 characters", () => {
+      expect(() => validateProjectName("a".repeat(215))).toThrow(/214 characters/);
+    });
+
+    test("passes for name exactly 214 characters", () => {
+      expect(() => validateProjectName("a".repeat(214))).not.toThrow();
+    });
+  });
+
   describe("checkNodeVersion", () => {
     test("throws for low version", () => {
       const original = process.version;
@@ -70,7 +107,35 @@ describe("create-nttb helpers", () => {
     });
   });
 
+  describe("checkNpmVersion", () => {
+    afterEach(() => child.execSync.mockReset());
+
+    test("passes for sufficient npm version", () => {
+      child.execSync.mockReturnValue("10.0.0");
+      expect(() => checkNpmVersion(10)).not.toThrow();
+    });
+
+    test("passes for higher npm version", () => {
+      child.execSync.mockReturnValue("11.3.0");
+      expect(() => checkNpmVersion(10)).not.toThrow();
+    });
+
+    test("throws for npm version too low", () => {
+      child.execSync.mockReturnValue("9.8.0");
+      expect(() => checkNpmVersion(10)).toThrow(/npm v10\+ required/);
+    });
+
+    test("throws when npm not accessible", () => {
+      child.execSync.mockImplementation(() => {
+        throw new Error("not found");
+      });
+      expect(() => checkNpmVersion(10)).toThrow(/npm is not installed/);
+    });
+  });
+
   describe("checkGitInstalled", () => {
+    afterEach(() => child.execSync.mockReset());
+
     test("passes when git present", () => {
       child.execSync.mockImplementation(() => {});
       expect(() => checkGitInstalled()).not.toThrow();
@@ -120,6 +185,26 @@ describe("create-nttb helpers", () => {
       child.spawnSync.mockReturnValue({ status: 0 } as any);
       expect(() => runCommand("ok")).not.toThrow();
     });
+
+    test("passes cwd option through", () => {
+      child.spawnSync.mockReturnValue({ status: 0 } as any);
+      runCommand("ok", [], { cwd: "/tmp" });
+      expect(child.spawnSync).toHaveBeenCalledWith(
+        "ok",
+        [],
+        expect.objectContaining({ cwd: "/tmp" }),
+      );
+    });
+
+    test("passes timeout option through", () => {
+      child.spawnSync.mockReturnValue({ status: 0 } as any);
+      runCommand("ok", [], { timeout: 60000 });
+      expect(child.spawnSync).toHaveBeenCalledWith(
+        "ok",
+        [],
+        expect.objectContaining({ timeout: 60000 }),
+      );
+    });
   });
 
   describe("updatePackageJson", () => {
@@ -149,6 +234,7 @@ describe("create-nttb helpers", () => {
       expect(updated.version).toBe("1.0.0");
       expect(updated.description).toBe(`${name} app description`);
       expect(updated.keywords).toHaveLength(7);
+      expect(updated.keywords).toContain(name);
       expect(updated.scripts).toEqual({
         dev: "next dev",
         build: "next build",
@@ -160,6 +246,23 @@ describe("create-nttb helpers", () => {
       ["author", "bin", "files", "homepage", "repository", "bugs", "funding"].forEach((k) =>
         expect(updated[k]).toBeUndefined(),
       );
+    });
+
+    test("preserves existing fields not in the update list", () => {
+      fs.mkdirSync(projectDir);
+
+      const pkg = {
+        name: "starter",
+        version: "0.1.0",
+        dependencies: { next: "16.0.0" },
+      };
+
+      fs.writeFileSync(path.join(projectDir, "package.json"), JSON.stringify(pkg));
+
+      updatePackageJson(projectDir, name);
+
+      const updated = readPkg(projectDir);
+      expect(updated.dependencies).toEqual({ next: "16.0.0" });
     });
   });
 

@@ -1,4 +1,4 @@
-name: npm-release-check
+name: "Test NPM"
 
 on:
   pull_request:
@@ -11,13 +11,13 @@ on:
       - 'tsconfig.cli.json'
       - 'bin/**'
       - 'dist/**'
-      - '.github/workflows/npm-release-check.yml'
+      - '.github/workflows/test-npm.yml'
 
 permissions:
   contents: read
 
 jobs:
-  npm-release-check:
+  test-npm:
     runs-on: ubuntu-latest
 
     steps:

@@ -1,4 +1,4 @@
-name: CI — Boilerplate
+name: CI - Boilerplate
 
 on:
   pull_request:

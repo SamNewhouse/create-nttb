@@ -23,7 +23,7 @@ cd app-name
 npm install
 ```
 
-You're now ready to start developing — see below for more useful commands.
+You're now ready to start developing - see below for more useful commands.
 
 ### Environment Variables
 
@@ -48,11 +48,11 @@ cp .env.example .env
 
 ## Key Packages
 
-- **Next.js 16** — React framework providing server-side rendering, routing, and App Router API routes.
-- **Tailwind CSS** — Utility-first CSS framework and PostCSS integration for rapid styling.
-- **TypeScript** — Static typing for better developer experience and fewer runtime errors.
-- **Jest + ts-jest** — Unit testing with full TypeScript support.
-- **Prettier** — Automated code formatter enforcing consistent style.
+- **Next.js 16** - React framework providing server-side rendering, routing, and App Router API routes.
+- **Tailwind CSS** - Utility-first CSS framework and PostCSS integration for rapid styling.
+- **TypeScript** - Static typing for better developer experience and fewer runtime errors.
+- **Jest + ts-jest** - Unit testing with full TypeScript support.
+- **Prettier** - Automated code formatter enforcing consistent style.
 
 ---
 
@@ -61,7 +61,7 @@ cp .env.example .env
 ```bash
 public/                 # Static assets (images, favicon, etc.)
 src/                    # Source code
-├── app/                # Next.js App Router — pages and API routes
+├── app/                # Next.js App Router - pages and API routes
 │   └── api/            # Route handlers (App Router)
 ├── config/             # Config and environment variables
 ├── presentation/       # Components organised by Atomic Design
@@ -107,8 +107,8 @@ return sendError(503, "Unavailable");   // 500+
 
 Every project scaffolded with `create-nttb` includes dynamic generation of:
 
-- `/sitemap.xml` — built from your `src/app` folder structure with sensible defaults for `lastmod`, `priority`, and `changefreq`.
-- `/robots.txt` — served from a route handler that always points to the current `/sitemap.xml` URL and disallows `/api/`.
+- `/sitemap.xml` - built from your `src/app` folder structure with sensible defaults for `lastmod`, `priority`, and `changefreq`.
+- `/robots.txt` - served from a route handler that always points to the current `/sitemap.xml` URL and disallows `/api/`.
 
 These files are generated at request time in production with incremental revalidation, so they stay up to date automatically as you add new top-level routes under `src/app`.
 
@@ -126,4 +126,4 @@ These files are generated at request time in production with incremental revalid
 
 ## Licence
 
-This project is licensed under the ISC Licence — see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the ISC Licence - see the [LICENSE](./LICENSE) file for details.

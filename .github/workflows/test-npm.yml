@@ -1,23 +1,15 @@
-name: npm-release-check
+name: Test NPM
 
 on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
-      - '.npmrc'
-      - 'tsconfig.cli.json'
-      - 'bin/**'
-      - 'dist/**'
-      - '.github/workflows/npm-release-check.yml'
 
 permissions:
   contents: read
 
 jobs:
-  npm-release-check:
+  test-npm:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,13 +20,22 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org
+          registry-url: 'https://registry.npmjs.org'
           package-manager-cache: false
 
       - name: Show versions
         run: |
           node -v
           npm -v
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build CLI artifact
+        run: npm run build:cli
+
+      - name: Assert CLI artifact exists
+        run: test -f dist/create.js
 
       - name: Validate package.json normalization
         run: npm pkg fix --dry-run
@@ -48,5 +49,5 @@ jobs:
       - name: Optional token auth check
         if: ${{ secrets.NPM_TOKEN != '' }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm ping

@@ -1,5 +1,10 @@
 import { NextRequest } from "next/server";
-import { sendBadRequest, sendCreated, sendError, sendOk } from "../../../utils/response";
+import {
+  sendBadRequest,
+  sendCreated,
+  sendError,
+  sendOk,
+} from "../../../utils/response";
 import { User, CreateUserBody } from "../../../types";
 
 /**

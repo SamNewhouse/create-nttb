@@ -36,7 +36,8 @@ export function validateProjectName(name: string): void {
 
 export function checkNodeVersion(minMajor: number = 20): void {
   const [major] = process.version.replace("v", "").split(".");
-  if (Number(major) < minMajor) throw new Error(`Node.js v${minMajor}+ required`);
+  if (Number(major) < minMajor)
+    throw new Error(`Node.js v${minMajor}+ required`);
 }
 
 export function checkNpmVersion(minMajor: number = 10): void {
@@ -47,13 +48,16 @@ export function checkNpmVersion(minMajor: number = 10): void {
     throw new Error("npm is not installed or not accessible.");
   }
   const [major] = version.split(".");
-  if (Number(major) < minMajor) throw new Error(`npm v${minMajor}+ required (found v${version})`);
+  if (Number(major) < minMajor)
+    throw new Error(`npm v${minMajor}+ required (found v${version})`);
 }
 
 export function createProjectDirectory(projectPath: string): void {
   if (fs.existsSync(projectPath)) {
     if (fs.readdirSync(projectPath).length === 0) return;
-    throw new Error(`Directory "${path.basename(projectPath)}" exists and is not empty.`);
+    throw new Error(
+      `Directory "${path.basename(projectPath)}" exists and is not empty.`,
+    );
   }
   fs.mkdirSync(projectPath, { recursive: true });
 }
@@ -64,8 +68,10 @@ export function runCommand(
   options: SpawnSyncOptions = {},
 ): void {
   const result = spawnSync(command, args, { stdio: "ignore", ...options });
-  if (!result || typeof result !== "object") throw new Error(`${command} failed`);
-  if (result.error) throw new Error(result.error.message || `${command} failed`);
+  if (!result || typeof result !== "object")
+    throw new Error(`${command} failed`);
+  if (result.error)
+    throw new Error(result.error.message || `${command} failed`);
   if (result.status !== 0) throw new Error(`${command} failed`);
 }
 
@@ -73,7 +79,10 @@ export function copyTemplate(templateDir: string, projectPath: string): void {
   fs.cpSync(templateDir, projectPath, { recursive: true });
 }
 
-export function updatePackageJson(projectPath: string, projectName: string): void {
+export function updatePackageJson(
+  projectPath: string,
+  projectName: string,
+): void {
   const file = path.join(projectPath, "package.json");
   const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
   const updated = {
@@ -135,7 +144,9 @@ export async function main(): Promise<void> {
     doneStep();
 
     clearLine();
-    console.log(`\nInstallation complete\n\n Next steps:\n\n cd ${name}\n npm run dev\n`);
+    console.log(
+      `\nInstallation complete\n\n Next steps:\n\n cd ${name}\n npm run dev\n`,
+    );
   } catch (err) {
     clearLine();
     if (fs.existsSync(projectPath)) {

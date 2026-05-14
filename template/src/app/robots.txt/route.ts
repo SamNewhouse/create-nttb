@@ -27,7 +27,10 @@ export async function GET() {
   const baseUrl = getRequestBaseUrl(h);
 
   const robotsTxt =
-    `User-agent: *\n` + `Allow: /\n` + `Disallow: /api/\n` + `Sitemap: ${baseUrl}/sitemap.xml\n`;
+    `User-agent: *\n` +
+    `Allow: /\n` +
+    `Disallow: /api/\n` +
+    `Sitemap: ${baseUrl}/sitemap.xml\n`;
 
   return new Response(robotsTxt, {
     status: 200,

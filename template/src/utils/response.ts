@@ -73,7 +73,9 @@ export function sendNotFound(message = "Not Found"): NextResponse {
  * @example
  * return sendMethodNotAllowed(["GET", "POST"]);
  */
-export function sendMethodNotAllowed(allowed: string[] = ["GET"]): NextResponse {
+export function sendMethodNotAllowed(
+  allowed: string[] = ["GET"],
+): NextResponse {
   return NextResponse.json(
     { error: `Method not allowed. Allowed: ${allowed.join(", ")}` },
     { status: 405, headers: { Allow: allowed.join(", ") } },
@@ -90,6 +92,9 @@ export function sendMethodNotAllowed(allowed: string[] = ["GET"]): NextResponse 
  * @example
  * return sendError(503, "Service temporarily unavailable");
  */
-export function sendError(status = 500, message = "Internal Server Error"): NextResponse {
+export function sendError(
+  status = 500,
+  message = "Internal Server Error",
+): NextResponse {
   return NextResponse.json({ error: message }, { status });
 }

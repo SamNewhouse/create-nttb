@@ -67,25 +67,39 @@ describe("create-nttb helpers", () => {
     });
 
     test("throws for name with spaces", () => {
-      expect(() => validateProjectName("my app")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("my app")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name with special characters", () => {
-      expect(() => validateProjectName("my@app")).toThrow(/Invalid project name/);
-      expect(() => validateProjectName("../evil")).toThrow(/Invalid project name/);
-      expect(() => validateProjectName("./local")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("my@app")).toThrow(
+        /Invalid project name/,
+      );
+      expect(() => validateProjectName("../evil")).toThrow(
+        /Invalid project name/,
+      );
+      expect(() => validateProjectName("./local")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name starting with hyphen", () => {
-      expect(() => validateProjectName("-myapp")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("-myapp")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name ending with hyphen", () => {
-      expect(() => validateProjectName("myapp-")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("myapp-")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name exceeding 214 characters", () => {
-      expect(() => validateProjectName("a".repeat(215))).toThrow(/214 characters/);
+      expect(() => validateProjectName("a".repeat(215))).toThrow(
+        /214 characters/,
+      );
     });
 
     test("passes for name exactly 214 characters", () => {
@@ -194,7 +208,10 @@ describe("create-nttb helpers", () => {
     test("copies files from template to project directory", () => {
       const srcDir = path.join(tempDir, "template");
       fs.mkdirSync(srcDir);
-      fs.writeFileSync(path.join(srcDir, "package.json"), JSON.stringify({ name: "template" }));
+      fs.writeFileSync(
+        path.join(srcDir, "package.json"),
+        JSON.stringify({ name: "template" }),
+      );
       fs.mkdirSync(projectDir);
 
       copyTemplate(srcDir, projectDir);
@@ -206,12 +223,17 @@ describe("create-nttb helpers", () => {
       const srcDir = path.join(tempDir, "template");
       fs.mkdirSync(srcDir);
       fs.mkdirSync(path.join(srcDir, "src"));
-      fs.writeFileSync(path.join(srcDir, "src", "index.ts"), "export default {};");
+      fs.writeFileSync(
+        path.join(srcDir, "src", "index.ts"),
+        "export default {};",
+      );
       fs.mkdirSync(projectDir);
 
       copyTemplate(srcDir, projectDir);
 
-      expect(fs.existsSync(path.join(projectDir, "src", "index.ts"))).toBe(true);
+      expect(fs.existsSync(path.join(projectDir, "src", "index.ts"))).toBe(
+        true,
+      );
     });
   });
 
@@ -234,7 +256,10 @@ describe("create-nttb helpers", () => {
         dependencies: { next: "16.0.0" },
       };
 
-      fs.writeFileSync(path.join(projectDir, "package.json"), JSON.stringify(pkg));
+      fs.writeFileSync(
+        path.join(projectDir, "package.json"),
+        JSON.stringify(pkg),
+      );
 
       updatePackageJson(projectDir, name);
 
@@ -264,7 +289,10 @@ describe("create-nttb helpers", () => {
         dependencies: { next: "16.0.0" },
       };
 
-      fs.writeFileSync(path.join(projectDir, "package.json"), JSON.stringify(pkg));
+      fs.writeFileSync(
+        path.join(projectDir, "package.json"),
+        JSON.stringify(pkg),
+      );
 
       updatePackageJson(projectDir, name);
 

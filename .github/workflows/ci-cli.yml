@@ -97,9 +97,8 @@ jobs:
         run: npm publish --dry-run --access public
 
       - name: Token auth check
-        if: ${{ secrets.NPM_TOKEN != '' }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ -n "$NPM_TOKEN" ]; then
             npm ping

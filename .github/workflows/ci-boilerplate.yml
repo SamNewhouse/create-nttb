@@ -4,7 +4,11 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "template/**"
+      - "src/**"
+      - "next.config.mjs"
+      - "tsconfig.json"
+      - "postcss.config.js"
+      - "jest.config.js"
       - ".github/workflows/ci-boilerplate.yml"
 
 permissions:
@@ -17,10 +21,6 @@ jobs:
     strategy:
       matrix:
         node: ["20.x", "24.x"]
-
-    defaults:
-      run:
-        working-directory: template
 
     steps:
       - uses: actions/checkout@v6

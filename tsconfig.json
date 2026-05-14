@@ -13,7 +13,8 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "noEmit": true,
     "allowJs": false,
-    "plugins": [{ "name": "next" }]
+    "plugins": [{ "name": "next" }],
+    "types": ["node", "jest"]
   },
   "include": ["next-env.d.ts", "src/**/*", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
   "exclude": ["node_modules", "dist", ".next", "bin"]

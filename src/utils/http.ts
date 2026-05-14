@@ -1,42 +1,53 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { NEXT_PUBLIC_API_URL } from "../config/variables";
 
 /**
- * Create a reusable Axios HTTP client instance.
- * - Sets the base URL from your environment config.
- * - Configures request timeout and standard JSON headers.
+ * Represents an HTTP error returned from a failed request.
  */
-export const httpClient: AxiosInstance = axios.create({
-  baseURL: NEXT_PUBLIC_API_URL,
-  timeout: 5000,
-  headers: { "Content-Type": "application/json" },
-});
+export class HttpError extends Error {
+  public readonly status: number | undefined;
+
+  constructor(status: number | undefined, message: string) {
+    super(message);
+    this.name = "HttpError";
+    this.status = status;
+  }
+}
 
 /**
- * Makes an HTTP request using the shared Axios client.
- * Handles errors and always returns the data directly.
+ * Makes an HTTP request using the native fetch API.
  *
- * @param config - Axios request config (method, url, data, params, etc).
- * @returns The response data, typed as generic T if provided.
- * @throws An object with `message` and `status` if the request fails.
+ * Automatically prepends the base API URL from environment config,
+ * sets JSON content headers, and throws an {@link HttpError} for
+ * non-2xx responses with the status code and error message from the body.
+ *
+ * Requests time out after 5 seconds via {@link AbortSignal.timeout}.
+ *
+ * @param path - The API path to append to the base URL (e.g. `/users/1`).
+ * @param options - Standard {@link RequestInit} fetch options (method, body, headers, etc).
+ * @returns The parsed JSON response body typed as `T`.
+ * @throws {@link HttpError} if the response status is not ok, or if the network fails.
+ * @throws {@link DOMException} with name `"TimeoutError"` if the request exceeds 5 seconds.
+ *
+ * @example
+ * const user = await request<User>("/users/1");
+ * const created = await request<User>("/users", { method: "POST", body: JSON.stringify(data) });
  */
-export async function request<T = any>(config: AxiosRequestConfig): Promise<T> {
-  try {
-    // Execute the HTTP request using the client
-    const response = await httpClient.request<T>(config);
-    return response.data;
-  } catch (error) {
-    // Default error message and status
-    let message = "HTTP error occurred";
-    let status;
-    // If the error is from Axios, parse for more details
-    if (axios.isAxiosError(error)) {
-      status = error.response?.status;
-      message = error.response?.data?.message || error.message;
-    } else if (error instanceof Error) {
-      message = error.message;
-    }
-    // Throw standardized error object for consumption by your app
-    throw { message, status };
+export async function request<T = unknown>(path: string, options?: RequestInit): Promise<T> {
+  const url = `${NEXT_PUBLIC_API_URL}${path}`;
+
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(5000),
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new HttpError(response.status, body?.message ?? response.statusText);
   }
+
+  return response.json() as Promise<T>;
 }

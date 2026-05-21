@@ -4,11 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "src/**"
-      - "next.config.mjs"
-      - "tsconfig.json"
-      - "postcss.config.js"
-      - "jest.config.js"
+      - "template/**"
       - ".github/workflows/ci-boilerplate.yml"
 
 permissions:
@@ -21,13 +17,16 @@ jobs:
     strategy:
       matrix:
         node: ["20.x", "24.x"]
+    defaults:
+      run:
+        working-directory: template
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
 

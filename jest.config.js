@@ -7,7 +7,7 @@ module.exports = {
   transformIgnorePatterns: ["/node_modules/"],
   globals: {
     "ts-jest": {
-      tsconfig: "tsconfig.cli.json",
+      tsconfig: "tsconfig.json",
     },
   },
 };

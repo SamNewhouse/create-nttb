@@ -1,21 +1,21 @@
 {
   "compilerOptions": {
+    "target": "ES2020",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2020"],
+    "outDir": "./dist",
+    "rootDir": "./bin",
     "strict": true,
     "esModuleInterop": true,
-    "module": "preserve",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "target": "esnext",
     "skipLibCheck": true,
-    "incremental": true,
-    "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "noEmit": true,
-    "allowJs": false,
-    "plugins": [{ "name": "next" }],
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "types": ["node", "jest"]
   },
-  "include": ["next-env.d.ts", "src/**/*", ".next/types/**/*.ts", ".next/dev/types/**/*.ts"],
-  "exclude": ["node_modules", "dist", ".next", "bin"]
+  "include": ["bin/**/*"],
+  "exclude": ["node_modules", "dist", "template"]
 }

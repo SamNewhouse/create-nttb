@@ -79,7 +79,9 @@ describe("request()", () => {
 
   describe("error responses", () => {
     it("throws HttpError with status and message from response body", async () => {
-      mockFetch.mockResolvedValue(mockResponse({ message: "Not found" }, 404, false));
+      mockFetch.mockResolvedValue(
+        mockResponse({ message: "Not found" }, 404, false),
+      );
 
       await expect(request("/missing")).rejects.toMatchObject({
         name: "HttpError",
@@ -114,7 +116,9 @@ describe("request()", () => {
     });
 
     it("HttpError is an instance of Error", async () => {
-      mockFetch.mockResolvedValue(mockResponse({ message: "Unauthorized" }, 401, false));
+      mockFetch.mockResolvedValue(
+        mockResponse({ message: "Unauthorized" }, 401, false),
+      );
 
       await expect(request("/secure")).rejects.toBeInstanceOf(HttpError);
       await expect(request("/secure")).rejects.toBeInstanceOf(Error);
@@ -127,10 +131,14 @@ describe("request()", () => {
     });
 
     it("throws TimeoutError when the request exceeds 5 seconds", async () => {
-      mockFetch.mockRejectedValue(new DOMException("signal timed out", "TimeoutError"));
+      mockFetch.mockRejectedValue(
+        new DOMException("signal timed out", "TimeoutError"),
+      );
 
       await expect(request("/slow")).rejects.toThrow("signal timed out");
-      await expect(request("/slow")).rejects.toMatchObject({ name: "TimeoutError" });
+      await expect(request("/slow")).rejects.toMatchObject({
+        name: "TimeoutError",
+      });
     });
   });
 });

@@ -1,12 +1,19 @@
 import fs from "fs";
-import { getRequestBaseUrl, getTopLevelRoutes, getRoutePriority, getChangeFreq } from "./site";
+import {
+  getRequestBaseUrl,
+  getTopLevelRoutes,
+  getRoutePriority,
+  getChangeFreq,
+} from "./site";
 
 function makeHeaders(map: Record<string, string>) {
   return { get: (key: string) => map[key] ?? null };
 }
 
 jest.mock("fs");
-const mockReaddirSync = fs.readdirSync as jest.MockedFunction<typeof fs.readdirSync>;
+const mockReaddirSync = fs.readdirSync as jest.MockedFunction<
+  typeof fs.readdirSync
+>;
 
 function makeDirent(name: string, isDir: boolean) {
   return { name, isDirectory: () => isDir } as fs.Dirent;
@@ -14,7 +21,10 @@ function makeDirent(name: string, isDir: boolean) {
 
 describe("getRequestBaseUrl()", () => {
   it("uses x-forwarded-proto and host when present", () => {
-    const h = makeHeaders({ "x-forwarded-proto": "https", host: "example.com" });
+    const h = makeHeaders({
+      "x-forwarded-proto": "https",
+      host: "example.com",
+    });
     expect(getRequestBaseUrl(h as any)).toBe("https://example.com");
   });
 
@@ -24,7 +34,10 @@ describe("getRequestBaseUrl()", () => {
   });
 
   it("uses http when x-forwarded-proto is http", () => {
-    const h = makeHeaders({ "x-forwarded-proto": "http", host: "localhost:3000" });
+    const h = makeHeaders({
+      "x-forwarded-proto": "http",
+      host: "localhost:3000",
+    });
     expect(getRequestBaseUrl(h as any)).toBe("http://localhost:3000");
   });
 });
@@ -36,7 +49,10 @@ describe("getTopLevelRoutes()", () => {
   });
 
   it("includes top-level directories as routes", () => {
-    mockReaddirSync.mockReturnValue([makeDirent("about", true), makeDirent("blog", true)] as any);
+    mockReaddirSync.mockReturnValue([
+      makeDirent("about", true),
+      makeDirent("blog", true),
+    ] as any);
     expect(getTopLevelRoutes()).toEqual(["/", "/about", "/blog"]);
   });
 

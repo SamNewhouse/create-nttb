@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { FC, HTMLAttributeAnchorTarget, memo, PropsWithChildren, ReactNode } from "react";
+import {
+  FC,
+  HTMLAttributeAnchorTarget,
+  memo,
+  PropsWithChildren,
+  ReactNode,
+} from "react";
 
 interface Props {
   children?: ReactNode;

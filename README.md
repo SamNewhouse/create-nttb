@@ -35,14 +35,14 @@ cp .env.example .env
 
 ### Common Scripts
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start the development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start the production server |
+| Script               | Description                        |
+| -------------------- | ---------------------------------- |
+| `npm run dev`        | Start the development server       |
+| `npm run build`      | Build for production               |
+| `npm run start`      | Start the production server        |
 | `npm run type-check` | Type-check without emitting output |
-| `npm test` | Run boilerplate unit tests |
-| `npm run format` | Format code with Prettier |
+| `npm test`           | Run boilerplate unit tests         |
+| `npm run format`     | Format code with Prettier          |
 
 ---
 
@@ -85,7 +85,10 @@ A typed `fetch` wrapper with automatic base URL, JSON headers, 5-second timeout 
 
 ```ts
 const user = await request<User>("/users/1");
-const created = await request<User>("/users", { method: "POST", body: JSON.stringify(data) });
+const created = await request<User>("/users", {
+  method: "POST",
+  body: JSON.stringify(data),
+});
 ```
 
 ### `utils/response.ts`
@@ -93,12 +96,12 @@ const created = await request<User>("/users", { method: "POST", body: JSON.strin
 Helper functions for App Router route handlers returning consistent `NextResponse` shapes:
 
 ```ts
-return sendOk<User[]>(users);           // 200
-return sendCreated<User>(newUser);      // 201
-return sendNoContent();                 // 204
+return sendOk<User[]>(users); // 200
+return sendCreated<User>(newUser); // 201
+return sendNoContent(); // 204
 return sendBadRequest("Invalid email"); // 400
-return sendNotFound("User not found");  // 404
-return sendError(503, "Unavailable");   // 500+
+return sendNotFound("User not found"); // 404
+return sendError(503, "Unavailable"); // 500+
 ```
 
 ---

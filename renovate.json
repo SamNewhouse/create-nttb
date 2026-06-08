@@ -7,7 +7,14 @@
   "packageRules": [
     {
       "matchFileNames": ["package.json"],
-      "commitMessagePrefix": "[DEPENDENCY]",
+      "commitMessagePrefix": "[CLI DEPENDENCY]",
+      "matchPackageNames": ["*"],
+      "automerge": false,
+      "separateMultipleMajor": true
+    },
+    {
+      "matchFileNames": ["template/package.json"],
+      "commitMessagePrefix": "[TEMPLATE DEPENDENCY]",
       "matchPackageNames": ["*"],
       "automerge": false,
       "separateMultipleMajor": true

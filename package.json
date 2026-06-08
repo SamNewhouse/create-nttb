@@ -1,6 +1,6 @@
 {
   "name": "create-nttb",
-  "version": "4.7.1",
+  "version": "5.0.0",
   "description": "An opinionated Next.js, TypeScript, and Tailwind boilerplate using Atomic Design Methodology for presentation components.",
   "license": "ISC",
   "readme": "README.md",
@@ -9,26 +9,14 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "build:cli": "npx tsc -p tsconfig.cli.json",
-    "start": "next start",
-    "format": "prettier --write .",
+    "build:cli": "npx tsc -p tsconfig.json",
     "type-check": "npx tsc --noEmit",
-    "test": "jest --roots ./src",
-    "test:cli": "jest --roots ./bin"
-  },
-  "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "test:cli": "jest",
+    "format": "prettier --write ."
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.3.0",
     "@types/jest": "30.0.0",
     "@types/node": "24.12.4",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
     "jest": "30.4.2",
     "prettier": "3.8.3",
     "tailwindcss": "4.3.0",
@@ -40,6 +28,7 @@
   },
   "files": [
     "dist",
+    "template",
     "README.md",
     "LICENSE",
     "package.json"
@@ -59,9 +48,6 @@
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/SamNewhouse"
-  },
-  "overrides": {
-    "glob": "13.0.6"
   },
   "keywords": [
     "create-nttb",
@@ -92,7 +78,6 @@
     "developer-experience",
     "opinionated",
     "best-practices",
-    "monorepo",
     "structure",
     "optimised",
     "code-quality",

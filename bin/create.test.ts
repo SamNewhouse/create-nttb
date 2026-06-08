@@ -14,11 +14,10 @@ import {
   validateProjectName,
   checkNodeVersion,
   checkNpmVersion,
-  checkGitInstalled,
   createProjectDirectory,
   runCommand,
+  copyTemplate,
   updatePackageJson,
-  cleanUp,
 } from "./create";
 
 jest.mock("child_process", () => ({
@@ -68,25 +67,39 @@ describe("create-nttb helpers", () => {
     });
 
     test("throws for name with spaces", () => {
-      expect(() => validateProjectName("my app")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("my app")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name with special characters", () => {
-      expect(() => validateProjectName("my@app")).toThrow(/Invalid project name/);
-      expect(() => validateProjectName("../evil")).toThrow(/Invalid project name/);
-      expect(() => validateProjectName("./local")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("my@app")).toThrow(
+        /Invalid project name/,
+      );
+      expect(() => validateProjectName("../evil")).toThrow(
+        /Invalid project name/,
+      );
+      expect(() => validateProjectName("./local")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name starting with hyphen", () => {
-      expect(() => validateProjectName("-myapp")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("-myapp")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name ending with hyphen", () => {
-      expect(() => validateProjectName("myapp-")).toThrow(/Invalid project name/);
+      expect(() => validateProjectName("myapp-")).toThrow(
+        /Invalid project name/,
+      );
     });
 
     test("throws for name exceeding 214 characters", () => {
-      expect(() => validateProjectName("a".repeat(215))).toThrow(/214 characters/);
+      expect(() => validateProjectName("a".repeat(215))).toThrow(
+        /214 characters/,
+      );
     });
 
     test("passes for name exactly 214 characters", () => {
@@ -130,22 +143,6 @@ describe("create-nttb helpers", () => {
         throw new Error("not found");
       });
       expect(() => checkNpmVersion(10)).toThrow(/npm is not installed/);
-    });
-  });
-
-  describe("checkGitInstalled", () => {
-    afterEach(() => child.execSync.mockReset());
-
-    test("passes when git present", () => {
-      child.execSync.mockImplementation(() => {});
-      expect(() => checkGitInstalled()).not.toThrow();
-    });
-
-    test("throws when git missing", () => {
-      child.execSync.mockImplementation(() => {
-        throw new Error("missing");
-      });
-      expect(() => checkGitInstalled()).toThrow(/Git is not installed/);
     });
   });
 
@@ -207,24 +204,62 @@ describe("create-nttb helpers", () => {
     });
   });
 
+  describe("copyTemplate", () => {
+    test("copies files from template to project directory", () => {
+      const srcDir = path.join(tempDir, "template");
+      fs.mkdirSync(srcDir);
+      fs.writeFileSync(
+        path.join(srcDir, "package.json"),
+        JSON.stringify({ name: "template" }),
+      );
+      fs.mkdirSync(projectDir);
+
+      copyTemplate(srcDir, projectDir);
+
+      expect(fs.existsSync(path.join(projectDir, "package.json"))).toBe(true);
+    });
+
+    test("copies nested directories", () => {
+      const srcDir = path.join(tempDir, "template");
+      fs.mkdirSync(srcDir);
+      fs.mkdirSync(path.join(srcDir, "src"));
+      fs.writeFileSync(
+        path.join(srcDir, "src", "index.ts"),
+        "export default {};",
+      );
+      fs.mkdirSync(projectDir);
+
+      copyTemplate(srcDir, projectDir);
+
+      expect(fs.existsSync(path.join(projectDir, "src", "index.ts"))).toBe(
+        true,
+      );
+    });
+  });
+
   describe("updatePackageJson", () => {
-    test("updates fields", () => {
+    test("updates name, version, description and keywords", () => {
       fs.mkdirSync(projectDir);
 
       const pkg = {
-        name: "starter",
-        version: "0.1.0",
-        author: "a",
-        bin: {},
-        homepage: "h",
-        repository: "r",
-        bugs: {},
-        files: [],
-        funding: {},
-        keywords: [],
+        name: "template",
+        version: "1.0.0",
+        private: true,
+        scripts: {
+          dev: "next dev",
+          build: "next build",
+          start: "next start",
+          format: "prettier --write .",
+          test: "jest",
+          "type-check": "tsc --noEmit",
+        },
+        dependencies: { next: "16.0.0" },
       };
 
-      fs.writeFileSync(path.join(projectDir, "package.json"), JSON.stringify(pkg));
+      fs.writeFileSync(
+        path.join(projectDir, "package.json"),
+        JSON.stringify(pkg),
+      );
 
       updatePackageJson(projectDir, name);
 
@@ -232,63 +267,38 @@ describe("create-nttb helpers", () => {
 
       expect(updated.name).toBe(name);
       expect(updated.version).toBe("1.0.0");
-      expect(updated.description).toBe(`${name} app description`);
+      expect(updated.description).toBe(`${name} app`);
       expect(updated.keywords).toHaveLength(7);
       expect(updated.keywords).toContain(name);
-      expect(updated.scripts).toEqual({
-        dev: "next dev",
-        build: "next build",
-        start: "next start",
-        format: "prettier --write .",
-        test: "jest",
-        "type-check": "tsc --noEmit",
-      });
-
-      ["author", "bin", "files", "homepage", "repository", "bugs", "funding"].forEach((k) =>
-        expect(updated[k]).toBeUndefined(),
-      );
     });
 
-    test("preserves existing fields not in the update list", () => {
+    test("preserves scripts and dependencies", () => {
       fs.mkdirSync(projectDir);
 
       const pkg = {
-        name: "starter",
-        version: "0.1.0",
+        name: "template",
+        version: "1.0.0",
+        scripts: {
+          dev: "next dev",
+          build: "next build",
+          start: "next start",
+          format: "prettier --write .",
+          test: "jest",
+          "type-check": "tsc --noEmit",
+        },
         dependencies: { next: "16.0.0" },
       };
 
-      fs.writeFileSync(path.join(projectDir, "package.json"), JSON.stringify(pkg));
+      fs.writeFileSync(
+        path.join(projectDir, "package.json"),
+        JSON.stringify(pkg),
+      );
 
       updatePackageJson(projectDir, name);
 
       const updated = readPkg(projectDir);
+      expect(updated.scripts).toEqual(pkg.scripts);
       expect(updated.dependencies).toEqual({ next: "16.0.0" });
-    });
-  });
-
-  describe("cleanUp", () => {
-    test("removes boilerplate files", () => {
-      fs.mkdirSync(projectDir);
-
-      [".git", ".github", "bin"].forEach((d) => fs.mkdirSync(path.join(projectDir, d)));
-      fs.writeFileSync(path.join(projectDir, "renovate.json"), "{}");
-      fs.writeFileSync(path.join(projectDir, "tsconfig.cli.json"), "{}");
-
-      [".git", ".github", "bin", "renovate.json", "tsconfig.cli.json"].forEach((d) =>
-        expect(fs.existsSync(path.join(projectDir, d))).toBe(true),
-      );
-
-      cleanUp(projectDir);
-
-      [".git", ".github", "bin", "renovate.json", "tsconfig.cli.json"].forEach((d) =>
-        expect(fs.existsSync(path.join(projectDir, d))).toBe(false),
-      );
-    });
-
-    test("skips missing files silently", () => {
-      fs.mkdirSync(projectDir);
-      expect(() => cleanUp(projectDir)).not.toThrow();
     });
   });
 });

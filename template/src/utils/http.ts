@@ -32,7 +32,10 @@ export class HttpError extends Error {
  * const user = await request<User>("/users/1");
  * const created = await request<User>("/users", { method: "POST", body: JSON.stringify(data) });
  */
-export async function request<T = unknown>(path: string, options?: RequestInit): Promise<T> {
+export async function request<T = unknown>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
   const url = `${NEXT_PUBLIC_API_URL}${path}`;
 
   const response = await fetch(url, {

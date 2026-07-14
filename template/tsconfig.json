@@ -2,8 +2,8 @@
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "target": "esnext",
@@ -14,7 +14,7 @@
     "noEmit": true,
     "allowJs": false,
     "plugins": [{ "name": "next" }],
-    "types": ["node", "jest"]
+    "types": ["node"]
   },
   "include": [
     "next-env.d.ts",

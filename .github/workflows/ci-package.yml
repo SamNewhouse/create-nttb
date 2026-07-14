@@ -49,12 +49,14 @@ jobs:
       - name: Simulate publish
         run: npm publish --dry-run --access public
 
-      - name: Token auth check
+      - name: Check npm auth
+        if: ${{ secrets.NPM_TOKEN != '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -n "$NODE_AUTH_TOKEN" ]; then
-            npm ping
-          else
-            echo "NPM_TOKEN not set, skipping ping"
-          fi
+          npm whoami
+          npm ping
+
+      - name: Skip npm auth check
+        if: ${{ secrets.NPM_TOKEN == '' }}
+        run: echo "NPM_TOKEN not available in this PR context; skipping auth check"

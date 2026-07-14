@@ -2,14 +2,6 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 
-jest.mock("./create", () => {
-  const actual = jest.requireActual<typeof import("./create")>("./create");
-  return {
-    ...actual,
-    main: jest.fn(),
-  };
-});
-
 import {
   validateProjectName,
   checkNodeVersion,
@@ -18,11 +10,11 @@ import {
   runCommand,
   copyTemplate,
   updatePackageJson,
-} from "./create";
+  getCreateNttbVersion,
+} from "./install";
 
 jest.mock("child_process", () => ({
   execSync: jest.fn(),
-  execFileSync: jest.fn(),
   spawnSync: jest.fn(),
 }));
 
@@ -270,6 +262,7 @@ describe("create-nttb helpers", () => {
       expect(updated.description).toBe(`${name} app`);
       expect(updated.keywords).toHaveLength(7);
       expect(updated.keywords).toContain(name);
+      expect(updated.createNttbVersion).toBe(getCreateNttbVersion());
     });
 
     test("preserves scripts and dependencies", () => {
@@ -299,6 +292,7 @@ describe("create-nttb helpers", () => {
       const updated = readPkg(projectDir);
       expect(updated.scripts).toEqual(pkg.scripts);
       expect(updated.dependencies).toEqual({ next: "16.0.0" });
+      expect(updated.createNttbVersion).toBe(getCreateNttbVersion());
     });
   });
 });

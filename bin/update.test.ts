@@ -33,10 +33,6 @@ describe("update command", () => {
     child.spawnSync.mockReset();
     child.spawnSync.mockReturnValue({ status: 0 });
 
-    jest
-      .spyOn(updateModule, "getCreateNttbVersion")
-      .mockReturnValue("5.0.3");
-
     jest.spyOn(updateModule, "getTemplatePackageJson").mockReturnValue({
       name: "my-app",
       version: "1.0.0",
@@ -123,7 +119,7 @@ describe("update command", () => {
     expect(updated.name).toBe("portfolio");
     expect(updated.description).toBe("Sam Newhouse Portfolio");
     expect(updated.author).toBe("Sam Newhouse");
-    expect(updated.createNttbVersion).toBe("5.0.3");
+    expect(updated.createNttbVersion).toBe(updateModule.getCreateNttbVersion());
 
     expect(updated.dependencies).toEqual({
       "@vercel/analytics": "2.0.1",
@@ -179,7 +175,7 @@ describe("update command", () => {
 
     const updated = readJson(path.join(targetDir, "package.json"));
 
-    expect(updated.createNttbVersion).toBe("5.0.3");
+    expect(updated.createNttbVersion).toBe(updateModule.getCreateNttbVersion());
     expect(updated.dependencies.next).toBe("16.2.10");
     expect(updated.devDependencies.typescript).toBe("6.0.3");
 

@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - "bin/**"
+      - "template/**"
       - "package.json"
+      - "package-lock.json"
       - "README.md"
       - "LICENSE"
       - ".github/workflows/ci-package.yml"
@@ -37,8 +39,11 @@ jobs:
       - name: Build CLI
         run: npm run build:cli
 
-      - name: Assert CLI artifact exists
-        run: test -f dist/create.js
+      - name: Assert CLI artifacts exist
+        run: |
+          test -f dist/index.js
+          test -f dist/install.js
+          test -f dist/update.js
 
       - name: Validate package.json normalisation
         run: npm pkg fix --dry-run

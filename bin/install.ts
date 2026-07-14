@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { execSync, spawnSync, SpawnSyncOptions } from "child_process";
 import path from "path";
 import fs from "fs";
@@ -36,8 +35,9 @@ export function validateProjectName(name: string): void {
 
 export function checkNodeVersion(minMajor: number = 20): void {
   const [major] = process.version.replace("v", "").split(".");
-  if (Number(major) < minMajor)
+  if (Number(major) < minMajor) {
     throw new Error(`Node.js v${minMajor}+ required`);
+  }
 }
 
 export function checkNpmVersion(minMajor: number = 10): void {
@@ -47,9 +47,11 @@ export function checkNpmVersion(minMajor: number = 10): void {
   } catch {
     throw new Error("npm is not installed or not accessible.");
   }
+
   const [major] = version.split(".");
-  if (Number(major) < minMajor)
+  if (Number(major) < minMajor) {
     throw new Error(`npm v${minMajor}+ required (found v${version})`);
+  }
 }
 
 export function createProjectDirectory(projectPath: string): void {
@@ -59,6 +61,7 @@ export function createProjectDirectory(projectPath: string): void {
       `Directory "${path.basename(projectPath)}" exists and is not empty.`,
     );
   }
+
   fs.mkdirSync(projectPath, { recursive: true });
 }
 
@@ -67,16 +70,36 @@ export function runCommand(
   args: string[] = [],
   options: SpawnSyncOptions = {},
 ): void {
-  const result = spawnSync(command, args, { stdio: "ignore", ...options });
-  if (!result || typeof result !== "object")
+  const result = spawnSync(command, args, { stdio: "inherit", ...options });
+
+  if (!result || typeof result !== "object") {
     throw new Error(`${command} failed`);
-  if (result.error)
+  }
+
+  if (result.error) {
     throw new Error(result.error.message || `${command} failed`);
-  if (result.status !== 0) throw new Error(`${command} failed`);
+  }
+
+  if (result.status !== 0) {
+    throw new Error(`${command} failed`);
+  }
 }
 
 export function copyTemplate(templateDir: string, projectPath: string): void {
   fs.cpSync(templateDir, projectPath, { recursive: true });
+}
+
+export function getCreateNttbVersion(): string {
+  const rootPackageJsonPath = path.join(__dirname, "..", "package.json");
+  const rootPkg = JSON.parse(fs.readFileSync(rootPackageJsonPath, "utf8"));
+
+  if (!rootPkg.version) {
+    throw new Error(
+      "Could not determine create-nttb version from root package.json.",
+    );
+  }
+
+  return rootPkg.version;
 }
 
 export function updatePackageJson(
@@ -85,6 +108,8 @@ export function updatePackageJson(
 ): void {
   const file = path.join(projectPath, "package.json");
   const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+  const createNttbVersion = getCreateNttbVersion();
+
   const updated = {
     ...pkg,
     name: projectName,
@@ -100,15 +125,15 @@ export function updatePackageJson(
       "boilerplate",
       projectName,
     ],
+    createNttbVersion,
   };
-  fs.writeFileSync(file, JSON.stringify(updated, null, 2));
+
+  fs.writeFileSync(file, JSON.stringify(updated, null, 2) + "\n");
 }
 
-export async function main(): Promise<void> {
-  const name = process.argv[2];
+export async function main(name?: string): Promise<void> {
   if (!name) {
-    console.error("Please provide a project name.");
-    process.exit(1);
+    throw new Error("Please provide a project name.");
   }
 
   const projectPath = path.join(process.cwd(), name);
@@ -145,7 +170,7 @@ export async function main(): Promise<void> {
 
     clearLine();
     console.log(
-      `\nInstallation complete\n\n Next steps:\n\n cd ${name}\n npm run dev\n`,
+      `\nInstallation complete\n\nNext steps:\n\ncd ${name}\nnpm run dev\n`,
     );
   } catch (err) {
     clearLine();
@@ -154,23 +179,4 @@ export async function main(): Promise<void> {
     }
     throw err;
   }
-}
-
-export default {
-  validateProjectName,
-  checkNodeVersion,
-  checkNpmVersion,
-  createProjectDirectory,
-  runCommand,
-  copyTemplate,
-  updatePackageJson,
-  main,
-};
-
-if (require.main === module) {
-  main().catch((err) => {
-    clearLine();
-    console.error("Error:", err.message);
-    process.exit(1);
-  });
 }

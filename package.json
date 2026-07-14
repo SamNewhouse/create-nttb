@@ -23,7 +23,7 @@
     "typescript": "6.0.3"
   },
   "bin": {
-    "create-nttb": "./dist/create.js"
+    "create-nttb": "./dist/index.js"
   },
   "files": [
     "dist",

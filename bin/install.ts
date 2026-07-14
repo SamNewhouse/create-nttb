@@ -116,6 +116,7 @@ export function updatePackageJson(
     version: "1.0.0",
     description: `${projectName} app`,
     private: true,
+    createNttbVersion,
     keywords: [
       "create-nttb",
       "nextjs",
@@ -125,7 +126,6 @@ export function updatePackageJson(
       "boilerplate",
       projectName,
     ],
-    createNttbVersion,
   };
 
   fs.writeFileSync(file, JSON.stringify(updated, null, 2) + "\n");

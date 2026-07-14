@@ -13,14 +13,13 @@ Designed for rapid project bootstrapping and consistent best practice, this opin
 Use the following command to initialise your project:
 
 ```bash
-npx create-nttb app-name
+npx create-nttb install app-name
 ```
 
-When the setup finishes, navigate into your new app directory and install dependencies:
+When the setup finishes, navigate into your new app directory:
 
 ```bash
 cd app-name
-npm install
 ```
 
 You're now ready to start developing - see below for more useful commands.
@@ -32,6 +31,22 @@ Copy the example env file and set your values:
 ```bash
 cp .env.example .env
 ```
+
+## Updating an Existing App
+
+Run this to update the current app’s boilerplate package versions:
+
+```bash
+npx create-nttb update
+```
+
+Or update a specific folder:
+
+```bash
+npx create-nttb update my-app
+```
+
+This syncs the app’s `package.json` with the current `create-nttb` template, then runs `npm install`.
 
 ### Common Scripts
 

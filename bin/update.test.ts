@@ -23,6 +23,7 @@ function readJson(filePath: string): Record<string, any> {
 }
 
 describe("update command", () => {
+  const template = updateModule.getTemplatePackageJson();
   let tempDir: string;
   let consoleLogSpy: jest.SpyInstance;
 
@@ -32,38 +33,6 @@ describe("update command", () => {
     consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {});
     child.spawnSync.mockReset();
     child.spawnSync.mockReturnValue({ status: 0 });
-
-    jest.spyOn(updateModule, "getTemplatePackageJson").mockReturnValue({
-      name: "my-app",
-      version: "1.0.0",
-      private: true,
-      createNttbVersion: "0.0.0",
-      scripts: {
-        dev: "next dev",
-        build: "next build",
-        start: "next start",
-        format: "prettier --write .",
-        "type-check": "tsc --noEmit",
-      },
-      dependencies: {
-        next: "16.2.10",
-        react: "19.2.7",
-        "react-dom": "19.2.7",
-      },
-      devDependencies: {
-        "@tailwindcss/postcss": "4.3.2",
-        "@types/node": "26.1.1",
-        "@types/react": "19.2.17",
-        "@types/react-dom": "19.2.3",
-        prettier: "3.9.5",
-        tailwindcss: "4.3.2",
-        typescript: "6.0.3",
-      },
-      engines: {
-        node: ">=20.0.0",
-        npm: ">=10.0.0",
-      },
-    });
   });
 
   afterEach(() => {
@@ -123,25 +92,12 @@ describe("update command", () => {
 
     expect(updated.dependencies).toEqual({
       "@vercel/analytics": "2.0.1",
-      next: "16.2.10",
-      react: "19.2.7",
-      "react-dom": "19.2.7",
+      ...template.dependencies,
     });
 
-    expect(updated.devDependencies).toEqual({
-      "@tailwindcss/postcss": "4.3.2",
-      "@types/node": "26.1.1",
-      "@types/react": "19.2.17",
-      "@types/react-dom": "19.2.3",
-      prettier: "3.9.5",
-      tailwindcss: "4.3.2",
-      typescript: "6.0.3",
-    });
+    expect(updated.devDependencies).toMatchObject(template.devDependencies);
 
-    expect(updated.engines).toEqual({
-      node: ">=20.0.0",
-      npm: ">=10.0.0",
-    });
+    expect(updated.engines).toEqual(template.engines);
 
     expect(child.spawnSync).toHaveBeenCalledWith(
       "npm",
@@ -176,8 +132,10 @@ describe("update command", () => {
     const updated = readJson(path.join(targetDir, "package.json"));
 
     expect(updated.createNttbVersion).toBe(updateModule.getCreateNttbVersion());
-    expect(updated.dependencies.next).toBe("16.2.10");
-    expect(updated.devDependencies.typescript).toBe("6.0.3");
+    expect(updated.dependencies.next).toBe(template.dependencies.next);
+    expect(updated.devDependencies.typescript).toBe(
+      template.devDependencies.typescript,
+    );
 
     expect(child.spawnSync).toHaveBeenCalledWith(
       "npm",

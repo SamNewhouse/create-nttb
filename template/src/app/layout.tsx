@@ -1,7 +1,7 @@
 import { Viewport } from "next";
 import "../styles/globals.css";
 import { ReactNode } from "react";
-import { Inter, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -10,15 +10,16 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+// Fonts ship with the app (src/app/fonts), so builds never download them from Google.
+const inter = localFont({
+  src: "./fonts/inter-latin.woff2",
+  weight: "400 700",
   variable: "--font-body",
   display: "swap",
 });
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["500", "700"],
+const spaceGrotesk = localFont({
+  src: "./fonts/space-grotesk-latin.woff2",
+  weight: "500 700",
   variable: "--font-heading",
   display: "swap",
 });
